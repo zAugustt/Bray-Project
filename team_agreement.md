@@ -44,3 +44,4 @@
 * checkout new branch, add name, sign commit, push branch to remote, make pull request
 * Matthew Livesay
 * Abdiel Rivera
+* Alexander Kearney
