@@ -41,7 +41,7 @@
 * If we need a specified review with the group for a change request, we will discuss the changes and take a vote following the change requests requirements.
 
 ## Team Member Signatures
-* checkout new branch, add name, sign commit, push branch to remote, make pull request
+* Josh Werner
 * Matthew Livesay
 * Abdiel Rivera
 * Alexander Kearney
