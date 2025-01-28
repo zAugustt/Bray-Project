@@ -45,3 +45,4 @@
 * Matthew Livesay
 * Abdiel Rivera
 * Alexander Kearney
+* Aysen De La Cruz
