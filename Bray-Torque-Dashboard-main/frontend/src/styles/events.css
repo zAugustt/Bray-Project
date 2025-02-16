@@ -1,0 +1,131 @@
+.event-container {
+    padding: 0% 5% 5% 5%;
+}
+
+.column-container {
+    display: flex;
+    justify-content: center;
+    height: 70vh;
+}
+
+.column {
+    border-radius: 10px;
+    box-sizing: border-box;
+    background-color: #ededed;
+    width: 70%;
+    padding: 20px;
+    height: 55vh;
+}
+
+.left-column-small {
+    width: 60%;
+    transition: 0.2s;
+}
+
+.right-column-open {
+    width: 40%;
+}
+
+.sidebar {
+    height: 100%;
+    width: 40%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: #ededed;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 1vh;
+    overflow-y: scroll;
+}
+
+.openbtn, .closebtn {
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 1vw;
+}
+
+.openbtn {
+    color: white;
+    background-color: #c8102e;
+    position: absolute;
+    top: 1.5vw;
+    right: 1.5vw;
+}
+
+.closebtn {
+    color: black;
+}
+
+.event-table {
+    width: 100%;
+    height: 100%;
+}
+
+.event-back-btn-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0% 15% 0% 15%;
+}
+
+.ag-theme-bray {
+    --ag-foreground-color: black;
+    --ag-background-color: #ededed;
+    --ag-header-foreground-color: white;
+    --ag-header-background-color: rgb(200, 16, 46);
+    --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
+    --ag-header-column-resize-handle-color: white;
+
+    --ag-font-size: 17px;
+    --ag-font-family: 'Segoe UI';
+}
+
+.back-btn {
+    background-color: #ededed;
+    color:black;
+    border: 1;
+    border-color: #c8102e;
+    font-size: 1rem;
+    border-radius: 10px;
+    padding: 0.33rem;
+    cursor: pointer;
+    height: min-content;
+    bottom: 0;
+    width: 5rem;
+}
+
+.view-details-btn {
+    font-size: 0.9rem;
+    background-color: #ededed;
+    color:black;
+    border: 1;
+    border-color: #c8102e;
+    border-radius: 10px;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.view-details-btn:hover,
+.back-btn:hover {
+    background-color: #c8102e;
+    color:white;
+}
+
+.trend-graph {
+    display: block;
+    width: 90%;
+    height: 30vh;
+    padding: 0 5% 5% 5%;
+}
+
+.trend-graph-title {
+    color: black;
+    font-weight: 400;
+    text-align: center;
+    align-content: center;
+}

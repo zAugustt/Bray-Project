@@ -1,0 +1,66 @@
+name: CI/CD
+
+on:
+  push:
+    # branches:
+    #   - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      # Define the PostgreSQL service for testing
+      postgres:
+        image: postgres:13-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testdb
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and run Docker Compose
+      env:
+        POSTGRES_PASSWORD: password  # Replace with secrets if sensitive
+        MQTT_PASSWORD: password  # Replace with secrets if sensitive
+      run: docker compose -f docker-compose.yml up -d --build
+
+    - name: Wait for services to be healthy
+      run: |
+        for i in {1..10}; do
+            docker compose exec db pg_isready -U postgres && break
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 3
+          done
+
+    - name: Run Backend Tests
+      if: always()
+      run: |
+        docker compose exec backend pytest
+
+
+    - name: Run Frontend Tests
+      if: always()
+      run: |
+        docker compose exec frontend npm test -- --watchAll=false --coverage
+
+    - name: Tear down
+      if: always()
+      run: docker compose down
