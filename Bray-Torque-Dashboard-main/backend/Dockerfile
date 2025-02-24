@@ -19,3 +19,4 @@ EXPOSE 5000
 
 # Start the Flask application
 CMD ["python", "app.py"]
+# CMD ["sh", "-c", "python db_connector/populate_data.py && python app.py"]

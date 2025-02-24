@@ -48,7 +48,9 @@ def sensors():
     Returns a JSON object containing a list of sensors. Also provides devEUI and number of events associated with
     sensor.
     """
+    print("Received request for /sensors")  # Add this line
     sensors = _conn.execute_query_readonly(queries.get_sensors)
+    print(f"Fetched sensors: {sensors}")  # Add this line
     sensor_datas = [{"id": sensor.id, "devEUI": sensor.devEUI, "numEvents": len(sensor.events)} for sensor in sensors]
     return jsonify(sensor_datas)
 

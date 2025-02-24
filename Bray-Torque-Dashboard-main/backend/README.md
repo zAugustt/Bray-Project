@@ -20,8 +20,8 @@ This program currently is meant to run alongside the other Docker containers def
 This module provides connections to the database, and ways to query (with rollbacks if those queries fail). This is used by both the MQTT client and API.
 
 ## [MQTT Client](mqtt_client/)
-> The client expects that packet payloads will be sent with the topic format `/sensor/<devEUI>/port/<portNumber>`. \
-> The topic format can be modified in the gateway or other source publishing messages to the broker.
+The client expects that packet payloads will be sent with the topic format `/sensor/<devEUI>/port/<portNumber>`. \
+The topic format can be modified in the gateway or other source publishing messages to the broker.
 
 This client subscribes to the MQTT broker created by Docker, parsing the data received and inserting this into the database. If an event already exists in the database, it will update the event with the new information in that packet.
 

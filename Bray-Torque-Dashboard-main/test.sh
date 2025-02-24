@@ -9,7 +9,8 @@ test_backend() {
 
     docker compose build backend
     docker compose up -d backend
-    cid=$(docker ps -q -f name=bray-torque-dashboard-backend-1)
+    cid=$(docker ps -q -f name=bray-torque-dashboard-main-backend-1)
+    echo "CID: $cid";
     docker exec $cid pytest
     docker cp "$cid:/app/pytest_report.html" test_output/
     docker cp "$cid:/app/htmlcov" test_output
