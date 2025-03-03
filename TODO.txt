@@ -1,0 +1,22 @@
+TODO:
+
+Investigate necessary components as we repurpose the legacy components for our implementation.
+
+Backend: 
+
+This includes:
+    - Models
+    - Queries
+    - API connections
+    - Dockerfiles
+This should not include:
+    - MQTT client
+    - Flask base
+
+Frontend:
+
+Not necessary to currently investigate implementation until backend support is repurposed.
+Ideally, update the design and functionality to best display our project
+
+NOTE: The web app is not something desired by our Industry Sponsor (Bray) therefore all work done can be unique to our specific implementation to best present our project
+
