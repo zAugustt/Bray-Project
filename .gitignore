@@ -9,6 +9,7 @@ htmlcov/
 .tox/
 docs/_build/
 *.egg-info/
+Bray-Torque-Dashboard-main
 
 # sensor data
 *.data 

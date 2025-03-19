@@ -12,7 +12,8 @@ Date:
     November 2024
 """
 
-from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo
+# from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo
+from .models import Event, DeviceInfo, DeviceData
 from mqtt_client.sensor_event import SensorEvent
 from sqlalchemy import select, desc
 from sqlalchemy.orm import joinedload
@@ -30,7 +31,6 @@ def create_tables(session):
     """
     from .models import Base
     Base.metadata.create_all(session.bind)
-
 
 def flatten_data(sensor_event: SensorEvent):
     """
@@ -60,50 +60,6 @@ def flatten_data(sensor_event: SensorEvent):
                 record_numbers.append(-1)
 
     return (flattened_torque_data, record_numbers, record_lengths)
-
-
-def hide_duplicate_packets(data: int, record_numbers: int, record_lengths: int, crc: List[int],
-                           prev_data: int, prev_record_numbers: int, prev_record_lengths: int, prev_crc: List[int]):
-    """
-    Finds duplicate packets from 2 events
-    Args:
-        data (int): list of flattened torque data for the event
-        record_numbers (List[int]): list of record numbers for the event
-        record_lengths (List[int]): list of record lengths for the event
-        crc (List[int]): list of crcs for the event
-        prev_data (List[int]): list of flattened torque data for the previous event
-        prev_record_numbers (List[int]): list of record numbers for the previous event
-        prev_record_lengths (List[int]): list of record lengths for the previous event
-        prev_crc (List[int]): list of crcs for the previous event
-
-    Returns:
-        (List): List of integers representing the packet numbers to hide
-    """
-    logging.info("Attempting to locate duplicate packets")
-
-    duplicate_packets = []
-    # Start at the last packet and go backward
-    index = len(record_lengths) - 1
-    prev_index = len(prev_record_lengths) - 1
-
-    # Loop while both indices are valid
-    while index >= 0 and prev_index >= 0:
-        start       = sum(record_lengths[:index])
-        end         = start + record_lengths[index]
-
-        prev_start  = sum(prev_record_lengths[:prev_index])
-        prev_end    = prev_start + prev_record_lengths[prev_index]
-
-        # If data and CRC match, store the packet number
-        if ((data[start:end] == prev_data[prev_start:prev_end]) and (crc[index] == prev_crc[prev_index])):
-            duplicate_packets.insert(0, record_numbers[index])
-        else:
-            break
-
-        index      -= 1
-        prev_index -= 1
-    return duplicate_packets
-
 
 def add_sensor_event(session, sensor_event: SensorEvent):
     """
@@ -179,88 +135,6 @@ def add_sensor_event(session, sensor_event: SensorEvent):
     # Add session to db (also adds other entities)
     session.add(event)
 
-
-def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int = -1, prev_sensor_event: SensorEvent = None):
-    """
-    Updates an event in the database. If live event doesn't exist, initialize it.
-    This assumes all events happen one after another, and cannot occur at the same time.
-
-    Args:
-        session (_type_): Session object. See module header.
-        sensor_event (SensorEvent): Event that will be added to database
-        event_type (int): -1 for default, 0 for heartbeat, 1 for data record, 2 for event summary
-        prev_sensor_event (SensorEvent): Previous event to be used as a comparison and check for duplicates
-    """
-    logging.info("Attempting to update sensor event")
-
-    # Query for an existing event with the same devEUI, live stream, and heartbeat CRC, with the highest ID
-    existing_event: Event = session.scalars(
-        select(Event).join(
-            Event.sensor
-        ).join(
-            Event.deviceData
-        ).filter(
-            Event.isStreaming == True,
-            Sensor.devEUI == sensor_event.devEUI,
-            DeviceData.heartbeatRecordPayloadCRC == sensor_event.heartbeatRecordPayloadCRC,
-        ).order_by(desc(Event.id))
-    ).first()
-
-    if existing_event is None:
-        logging.info("No matching event found, creating a new one")
-        sensor_event.isStreaming = True if eventType != 2 else False
-        return add_sensor_event(session, sensor_event)
-
-    # non-live events shouldn't be updated
-    if existing_event.isStreaming == False:
-        logging.warning("update_sensor_event(): Update of event failed. Attempted update of a non-live event")
-        return
-
-    # Transform sensor data to be compatible with db
-    hidden_packets = sensor_event.hiddenDataIndices
-    flattened_torque_data, record_numbers, record_lengths = flatten_data(sensor_event)
-
-    # update list of packets to hide if event summary reached
-    if ((eventType == 2) and (prev_sensor_event != None)):
-        hidden_packets = hide_duplicate_packets(flattened_torque_data, record_numbers, record_lengths, sensor_event.dataPacketPayloadCRCs,
-                                                *flatten_data(prev_sensor_event), prev_sensor_event.calculatedDataPacketPayloadCRCs)
-
-    # Set streaming to false if event summary reached
-    if eventType == 2:
-        existing_event.isStreaming = False
-
-    # replace current event in db with sensor event. Sensor_event should be the updated version of the event
-    logging.info("Found existing event, updating fields")
-
-    existing_event.deviceData.lastTorqueBeforeSleep = sensor_event.lastTorqueBeforeSleep
-    existing_event.deviceData.firstTorqueAfterSleep = sensor_event.firstTorqueAfterSleep
-    existing_event.deviceData.recordNumbers = record_numbers
-    existing_event.deviceData.recordLengths = record_lengths
-    existing_event.deviceData.torqueData = flattened_torque_data
-    existing_event.deviceData.hiddenDataIndices = hidden_packets
-    existing_event.deviceData.typeOfStroke = sensor_event.typeOfStroke
-    existing_event.deviceData.dataRecordPayloadCRCs = sensor_event.dataPacketPayloadCRCs
-    existing_event.deviceData.calculatedDataRecordPayloadCRCs = sensor_event.calculatedDataPacketPayloadCRCs
-    existing_event.deviceData.eventRecordPayloadCRC = sensor_event.eventSummaryPayloadCRC
-    existing_event.deviceData.calculatedEventRecordPayloadCRC = sensor_event.calculatedEventSummaryPayloadCRC
-    existing_event.deviceData.heartbeatRecordPayloadCRC = sensor_event.heartbeatRecordPayloadCRC
-    existing_event.deviceData.calculatedHeartbeatRecordPayloadCRC = sensor_event.calculatedHeartbeatRecordPayloadCRC
-
-    existing_event.deviceTrendInfo.strokeTime = sensor_event.strokeTime
-    existing_event.deviceTrendInfo.maxTorque = sensor_event.maxTorque
-    existing_event.deviceTrendInfo.temperature = sensor_event.temperature
-    existing_event.deviceTrendInfo.batteryVoltage = sensor_event.batteryVoltage
-
-    existing_event.deviceInfo.firmwareVersion = sensor_event.fwVersion
-    existing_event.deviceInfo.pwaRevision = sensor_event.pwaVersion
-    existing_event.deviceInfo.serialNumber = sensor_event.serialNumber
-    existing_event.deviceInfo.deviceType = sensor_event.deviceType
-    existing_event.deviceInfo.deviceLocation = sensor_event.deviceLocation
-    existing_event.deviceInfo.diagnostic = sensor_event.diagnostic
-    existing_event.deviceInfo.openValveCount = sensor_event.openValveCount
-    existing_event.deviceInfo.closeValveCount = sensor_event.closeValveCount
-
-
 def get_sensors(session):
     """
     Returns a list of sensors.
@@ -274,7 +148,6 @@ def get_sensors(session):
     return session.scalars(select(Sensor)
                            .options(joinedload(Sensor.events))  # Add entity property for Sensor to improve lookup times
                            ).unique().all()
-
 
 def get_events(session, sensor_id: int):
     """
@@ -291,7 +164,6 @@ def get_events(session, sensor_id: int):
                            .filter_by(sensorID=sensor_id)
                            .options(joinedload(Event.deviceTrendInfo))
                            ).all()
-
 
 def get_event(session, sensor_id: int, event_id: int):
     """
@@ -311,3 +183,67 @@ def get_event(session, sensor_id: int, event_id: int):
                                     joinedload(Event.deviceData),
                                     joinedload(Event.deviceTrendInfo))
                            ).first()
+
+def getDevInfo(session):
+    """
+    Retrieves all device information from the database.
+
+    Args:
+        session (_type_): Session object.
+
+    Returns:
+        List[DeviceInfo]: List of DeviceInfo objects.
+    """
+    return session.scalars(select(DeviceInfo)).all()
+
+def getDevData(session, sensorName: str):
+    """
+    Retrieves device data for a specific sensor.
+
+    Args:
+        session (_type_): Session object.
+        sensorName (str): Name of the sensor.
+
+    Returns:
+        List[DeviceData]: List of DeviceData objects associated with the sensor.
+    """
+    return session.scalars(
+        select(DeviceData)
+        .join(DeviceInfo, DeviceData.id == DeviceInfo.id)
+        .filter(DeviceInfo.sensorName == sensorName)
+    ).all()
+
+def getEvents(session, sensorName: str):
+    """
+    Retrieves all events for a specific sensor.
+
+    Args:
+        session (_type_): Session object.
+        sensorName (str): Name of the sensor.
+
+    Returns:
+        List[Event]: List of Event objects associated with the sensor.
+    """
+    return session.scalars(
+        select(Event)
+        .join(DeviceInfo, Event.deviceInfoID == DeviceInfo.id)
+        .filter(DeviceInfo.sensorName == sensorName)
+    ).all()
+
+def getEvent(session, sensorName: str, eventId: int):
+    """
+    Retrieves a specific event for a sensor by event ID.
+
+    Args:
+        session (_type_): Session object.
+        sensorName (str): Name of the sensor.
+        eventId (int): ID of the event.
+
+    Returns:
+        Event: Event object matching the criteria.
+    """
+    return session.scalars(
+        select(Event)
+        .join(DeviceInfo, Event.deviceInfoID == DeviceInfo.id)
+        .filter(DeviceInfo.sensorName == sensorName, Event.id == eventId)
+    ).first()

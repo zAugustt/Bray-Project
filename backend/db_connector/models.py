@@ -28,7 +28,7 @@ class Event(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     deviceInfoID: Mapped[int] = mapped_column(ForeignKey("device_info.id"), unique=True, nullable=False)
-    deviceInfoID: Mapped[int] = mapped_column(ForeignKey("device_data.id"), unique=True, nullable=False)
+    deviceDataID: Mapped[int] = mapped_column(ForeignKey("device_data.id"), unique=True, nullable=False)
     timestamp: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
 
 class DeviceInfo(Base):
