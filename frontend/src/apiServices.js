@@ -13,7 +13,7 @@ export const useSensorData = () => {
     const [sensorData, setSensorData] = useState([]);
 
     const fetchData = () => {
-        fetch(`http://localhost:5000/api_v1/sensors`)
+        fetch(`http://localhost:5000/api_v1/devices`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
