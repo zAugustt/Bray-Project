@@ -14,9 +14,6 @@ const EventsContainer = () => {
     const { sensorEvents, refreshData } = useSensorEvents(sensorId);
     const [isOpen, setIsOpen] = useState(false);
     const [batteryVoltages, setBatteryVoltages] = useState([]);
-    const [maxTorques, setMaxTorques] = useState([]);
-    const [strokeTimes, setStrokeTimes] = useState([]);
-    const [temperatures, setTemperatures] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const toggleSidebar = () => {
@@ -26,9 +23,6 @@ const EventsContainer = () => {
     useEffect(() => {
         if(sensorEvents.batteryVoltages){
             setBatteryVoltages(sensorEvents.batteryVoltages);
-            setMaxTorques(sensorEvents.maxTorques);
-            setStrokeTimes(sensorEvents.strokeTimes);
-            setTemperatures(sensorEvents.temperatures);
             setLoading(false);
         }
     }, [sensorEvents]);
@@ -51,10 +45,7 @@ const EventsContainer = () => {
                     ) : (
                         <div>
                             {/* add more trend graphs if needed */}
-                            <TrendGraph title="Battery Voltage Data" dataKey="batteryVoltages" data={batteryVoltages} />
-                            <TrendGraph title="Max Torque Data" dataKey="maxTorques" data={maxTorques} />
-                            <TrendGraph title="Stroke Times Data" dataKey="strokeTimes" data={strokeTimes} />
-                            <TrendGraph title="Temperature Data" dataKey="temperatures" data={temperatures} />
+                            <TrendGraph title="Carbon Dioxide Data" dataKey="batteryVoltages" data={batteryVoltages} />
                         </div>
                     )}
                 </div>
