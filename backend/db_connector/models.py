@@ -27,9 +27,12 @@ class Event(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    deviceInfoID: Mapped[int] = mapped_column(ForeignKey("device_info.id"), unique=True, nullable=False)
-    deviceDataID: Mapped[int] = mapped_column(ForeignKey("device_data.id"), unique=True, nullable=False)
+    deviceinfoid: Mapped[int] = mapped_column(ForeignKey("device_info.id"), unique=True, nullable=False)
+    devicedataid: Mapped[int] = mapped_column(ForeignKey("device_data.id"), unique=True, nullable=False)
     timestamp: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+
+    deviceInfo: Mapped["DeviceInfo"] = relationship("DeviceInfo", back_populates="events")
+    deviceData: Mapped["DeviceData"] = relationship("DeviceData", back_populates="events")
 
 class DeviceInfo(Base):
     """
@@ -40,12 +43,12 @@ class DeviceInfo(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    sensorName: Mapped[str] = mapped_column("sensorname", String, nullable=False)
-    serialNumber: Mapped[str] = mapped_column("serialnumber", String, nullable=False)
-    deviceType: Mapped[str] = mapped_column("devicetype", String, nullable=False)
-    deviceLocation: Mapped[str] = mapped_column("devicelocation", String, nullable=False)
+    sensorname: Mapped[str] = mapped_column("sensorname", String, nullable=False)
+    serialnumber: Mapped[str] = mapped_column("serialnumber", String, nullable=False)
+    devicetype: Mapped[str] = mapped_column("devicetype", String, nullable=False)
+    devicelocation: Mapped[str] = mapped_column("devicelocation", String, nullable=False)
 
-    event: Mapped["Event"] = relationship(back_populates="deviceInfo")
+    events: Mapped[list["Event"]] = relationship("Event", back_populates="deviceInfo")
 
 class DeviceData(Base):
     """
@@ -56,6 +59,6 @@ class DeviceData(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    measurementData: Mapped[list[float]] = mapped_column(ARRAY(Float), nullable=False)
+    measurementdata: Mapped[list[float]] = mapped_column(ARRAY(Float), nullable=False)
 
-    event: Mapped["Event"] = relationship(back_populates="deviceData")
+    events: Mapped[list["Event"]] = relationship("Event", back_populates="deviceData")
