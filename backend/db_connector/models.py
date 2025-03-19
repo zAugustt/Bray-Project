@@ -40,10 +40,10 @@ class DeviceInfo(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    sensorName: Mapped[str] = mapped_column(String, nullable=False)
-    serialNumber: Mapped[str] = mapped_column(String, nullable=False)
-    deviceType: Mapped[str] = mapped_column(String, nullable=False)
-    deviceLocation: Mapped[str] = mapped_column(String, nullable=False)
+    sensorName: Mapped[str] = mapped_column("sensorname", String, nullable=False)
+    serialNumber: Mapped[str] = mapped_column("serialnumber", String, nullable=False)
+    deviceType: Mapped[str] = mapped_column("devicetype", String, nullable=False)
+    deviceLocation: Mapped[str] = mapped_column("devicelocation", String, nullable=False)
 
     event: Mapped["Event"] = relationship(back_populates="deviceInfo")
 

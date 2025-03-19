@@ -4,6 +4,8 @@ Investigate necessary components as we repurpose the legacy components for our i
 
 Backend: 
 
+# psql -d sensor_info_db -U bray_tamu -h db -p 5432
+
 This includes:
     - Models
     - Queries

@@ -128,6 +128,39 @@ def event_download(sensor_id, event_id):
     )
 
 
+@api_v1.route("/devices", methods=["GET"])
+def devices():
+    """
+    Returns a JSON object containing a list of devices from the DeviceInfo table.
+
+    Returns:
+        JSON: List of devices with their details or an error message if something goes wrong.
+    """
+    try:
+        # Fetch all devices from the database
+        devices = _conn.execute_query_readonly(queries.getDevInfo)
+
+        # Format the device data
+        device_data = [
+            {
+                "id": device.id,
+                "sensorName": device.sensorName,
+                "serialNumber": device.serialNumber,
+                "deviceType": device.deviceType,
+                "deviceLocation": device.deviceLocation,
+            }
+            for device in devices
+        ]
+
+        # Return the formatted data as JSON
+        return jsonify(device_data), 200
+
+    except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching devices: {e}")
+        return jsonify({"error": "Failed to fetch devices"}), 500
+
+
 # Real-time packet updates. Split up for future ease of alterations
 def on_heartbeat_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 0)
