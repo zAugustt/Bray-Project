@@ -144,10 +144,10 @@ def devices():
         device_data = [
             {
                 "id": device.id,
-                "sensorName": device.sensorName,
-                "serialNumber": device.serialNumber,
-                "deviceType": device.deviceType,
-                "deviceLocation": device.deviceLocation,
+                "sensorName": device.sensorname,  # Corrected to match the database schema
+                "serialNumber": device.serialnumber,  # Corrected
+                "deviceType": device.devicetype,  # Corrected
+                "deviceLocation": device.devicelocation,  # Corrected
             }
             for device in devices
         ]
