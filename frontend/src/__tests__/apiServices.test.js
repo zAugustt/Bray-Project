@@ -11,7 +11,7 @@ describe('Custom Hook Tests', () => {
 
   describe('useSensorData', () => {
     it('fetches sensor data successfully', async () => {
-      const mockData = [{ id: 1, name: 'Sensor 1' }];
+      const mockData = [{ id: '1', sensorName: 'emission', serialNumber: '555AB29', numEvents: 2 }];
       fetch.mockResolvedValue({
         ok: true,
         json: async () => mockData,
@@ -23,7 +23,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorData).toEqual(mockData);
       });
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/devices');
     });
 
     it('handles fetch error', async () => {
@@ -35,7 +35,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorData).toEqual([]);
       });      
       
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/devices');
     });
   });
 

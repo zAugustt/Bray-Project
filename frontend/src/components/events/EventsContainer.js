@@ -13,7 +13,7 @@ const EventsContainer = () => {
     const { sensorId } = useParams();
     const { sensorEvents, refreshData } = useSensorEvents(sensorId);
     const [isOpen, setIsOpen] = useState(false);
-    const [batteryVoltages, setBatteryVoltages] = useState([]);
+    const [measurementData, setmeasurementData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const toggleSidebar = () => {
@@ -21,8 +21,8 @@ const EventsContainer = () => {
     };
 
     useEffect(() => {
-        if(sensorEvents.batteryVoltages){
-            setBatteryVoltages(sensorEvents.batteryVoltages);
+        if (sensorEvents.measurementData) {
+            setmeasurementData(sensorEvents.measurementData);
             setLoading(false);
         }
     }, [sensorEvents]);
@@ -45,7 +45,7 @@ const EventsContainer = () => {
                     ) : (
                         <div>
                             {/* add more trend graphs if needed */}
-                            <TrendGraph title="Carbon Dioxide Data" dataKey="batteryVoltages" data={batteryVoltages} />
+                            <TrendGraph title="Carbon Dioxide Data" dataKey="measurementData" data={measurementData} />
                         </div>
                     )}
                 </div>

@@ -161,8 +161,8 @@ def get_events(session, sensor_id: int):
         List[Event]: List of events containing `Event` objects.
     """
     return session.scalars(select(Event)
-                           .filter_by(sensorID=sensor_id)
-                           .options(joinedload(Event.deviceTrendInfo))
+                           .filter_by(deviceinfoid=sensor_id)
+                           #.options(joinedload(Event.DeviceData))
                            ).all()
 
 def get_event(session, sensor_id: int, event_id: int):
@@ -183,6 +183,22 @@ def get_event(session, sensor_id: int, event_id: int):
                                     joinedload(Event.deviceData),
                                     joinedload(Event.deviceTrendInfo))
                            ).first()
+
+def get_device_events(session, sensor_id: int):
+    """
+    Returns a list of events for a sensor.
+
+    Args:
+        session (_type_): Session object. See module header.
+        sensor_id (int): ID of sensor.
+
+    Returns:
+        List[Event]: List of events containing `Event` objects.
+    """
+    return session.scalars(select(Event)
+                           .filter_by(deviceInfoID=sensor_id)
+                           #.options(joinedload(Event.DeviceData))
+    ).all()
 
 def getDevInfo(session):
     """

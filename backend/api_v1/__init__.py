@@ -65,20 +65,17 @@ def events(sensor_id: int, last_n_events: int = 30):
     """
     # Get event data
     events = _conn.execute_query_readonly(queries.get_events, sensor_id)
-    event_datas = [{"id": event.id, "timestamp": event.timestamp} for event in events]
+    event_datas = [{"id": event.id, "timestamp": event.timestamp, "deviceinfoid": event.deviceinfoid, "devicedataid": event.devicedataid} for event in events]
     # Get device trend info for last n events
-    last_events = events[-1 * abs(last_n_events):]
-    batteryVoltages = [event.deviceTrendInfo.batteryVoltage for event in last_events]
-    temperatures = [event.deviceTrendInfo.temperature for event in last_events]
-    maxTorques = [event.deviceTrendInfo.maxTorque for event in last_events]
-    strokeTimes = [event.deviceTrendInfo.strokeTime for event in last_events]
+    #last_events = events[-1 * abs(last_n_events):]
+    #batteryVoltages = [event.deviceTrendInfo.batteryVoltage for event in last_events]
+    #temperatures = [event.deviceTrendInfo.temperature for event in last_events]
+    #maxTorques = [event.deviceTrendInfo.maxTorque for event in last_events]
+    #strokeTimes = [event.deviceTrendInfo.strokeTime for event in last_events]
 
     return jsonify({
         "event_datas": event_datas,
-        "batteryVoltages": batteryVoltages,
-        "maxTorques": maxTorques,
-        "strokeTimes": strokeTimes,
-        "temperatures": temperatures,
+        
     })
 
 
@@ -139,7 +136,7 @@ def devices():
     try:
         # Fetch all devices from the database
         devices = _conn.execute_query_readonly(queries.getDevInfo)
-
+        
         # Format the device data
         device_data = [
             {
@@ -160,6 +157,35 @@ def devices():
         logging.error(f"Error fetching devices: {e}")
         return jsonify({"error": "Failed to fetch devices"}), 500
 
+"""
+@api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
+def device_events(sensor_id: int):
+    
+    Returns a JSON object containing a list of events, as well as trend data.
+
+    Args:
+        sensor_id (int): ID of sensor.
+    
+    try:
+        events = _conn.execute_query_readonly(queries.get_device_events, sensor_id)
+
+        event_data = [
+            {
+                "id": event.id,
+                "timestamp": event.timestamp,
+                "deviceDataID": event.devicedataid,
+                "deviceInfoID": event.deviceinfoid,
+            }
+            for event in events
+        ]
+
+        return jsonify(event_data), 200
+
+        except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching events: {e}")
+        return jsonify({"error": "Failed to fetch events"}), 500
+"""
 
 # Real-time packet updates. Split up for future ease of alterations
 def on_heartbeat_packet(sensor_event: SensorEvent):
