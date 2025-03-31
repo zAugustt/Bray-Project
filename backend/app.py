@@ -22,4 +22,4 @@ app.register_blueprint(api_v1, url_prefix="/api_v1")
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)

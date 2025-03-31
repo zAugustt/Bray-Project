@@ -49,7 +49,7 @@ export const useSensorEvents = (sensorId) => {
 
     const fetchData = () => {
         // env value isn't actually set, to fetch api, see useSensorData()
-        fetch(`http://localhost:5000/api_v1/sensors/${sensorId}/events`)
+        fetch(`http://localhost:5001/api_v1/sensors/${sensorId}/events`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -87,7 +87,7 @@ export const useEventDetails = (sensorId, eventId, hidden) => {
 
     const fetchData = () => {
         // env value isn't actually set, to fetch api, see useSensorData()
-        const url = `http://localhost:5000/api_v1/sensors/${sensorId}/events/${eventId}`;
+        const url = `http://localhost:5001/api_v1/sensors/${sensorId}/events/${eventId}`;
         const fullUrl = (hidden.hidden === true ? `${url}/hidden` : url);
 
         fetch(fullUrl)
@@ -131,7 +131,7 @@ export const useEventDetailsDownload = (sensorId, eventId, hidden) => {
     const fetchData = async () => {
         try {
             // Fetch the CSV file from the API
-            const url = `http://localhost:5000/api_v1/sensors/${sensorId}/events/${eventId}/download`;
+            const url = `http://localhost:5001/api_v1/sensors/${sensorId}/events/${eventId}/download`;
             const fullUrl = (hidden.hidden === true ? `${url}/hidden` : url);
             const response = await fetch(fullUrl);
 
