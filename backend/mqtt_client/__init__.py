@@ -43,15 +43,18 @@ class ThreadedMQTTClient(Thread):
     on_data_packet: Callable[[SensorEvent], None] = None
     on_event_summary_packet: Callable[[SensorEvent], None] = None
     on_complete_event: Callable[[SensorEvent], None] = None
+    on_co2_packet: Callable[[int], None] = None #callback for CO2 sensor
 
     # Broker Information
     broker: str = getenv("MQTT_HOST", "mosquitto")
     broker_port: int = 1883
     topics: str = [("sensors/+/port/+", 2)]
+    #topics: List[tuple] = [("sensors/+/port/+", 2), ("sensors/co2", 2)] #include CO2 topic Note Published on same topic
     username: str = getenv("MQTT_USERNAME", None)
     password: str = getenv("MQTT_PASSWORD", None)
 
-    def __init__(self, on_heartbeat_packet: Callable = None, on_data_packet: Callable = None, on_event_summary_packet: Callable = None, on_complete_event: Callable = None):
+    def __init__(self, on_heartbeat_packet: Callable = None, on_data_packet: Callable = None, on_event_summary_packet: Callable = None, on_complete_event: Callable = None, 
+                 on_co2_packet: Callable = None):
         """
         Initializes the object.
 
@@ -62,12 +65,17 @@ class ThreadedMQTTClient(Thread):
             on_complete_event (Callable, optional): Deprecated.
         """
         super().__init__(daemon=True)  # Kill when parent process exits
+        
+        #Initialize MQTT client
         self.mqtt_client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)
         self.sensor_events = {}
+
+        #Callbacks
         self.on_heartbeat_packet = on_heartbeat_packet
         self.on_data_packet = on_data_packet
         self.on_event_summary_packet = on_event_summary_packet
         self.on_complete_event = on_complete_event
+        self.on_co2_packet = on_co2_packet
 
     def run(self):
         """
@@ -92,6 +100,7 @@ class ThreadedMQTTClient(Thread):
             "on_data_packet": self.on_data_packet,
             "on_event_summary_packet": self.on_event_summary_packet,
             "on_complete_event": self.on_complete_event,
+            "on_co2_packet": self.on_co2_packet,
         })
 
         # Set auth, connect, subscribe
@@ -103,6 +112,10 @@ class ThreadedMQTTClient(Thread):
             logging.info(">> Subscribed and connected")
         except Exception as e:
             logging.error(f"Could not connect to MQTT broker {self.broker} with error: {e}")
+
+        # Start CO2 sensor monitoring
+        if self.co2_sensor:
+            Thread(target=self._monitor_co2, daemon=True).start()
 
         # Start polling (blocking)
         logging.info(f">> Looping forever!!!")
@@ -125,6 +138,7 @@ class ThreadedMQTTClient(Thread):
         on_heartbeat_packet: Callable | None = userdata.get("on_heartbeat_packet")
         on_data_packet: Callable | None = userdata.get("on_data_packet")
         on_event_summary_packet: Callable | None = userdata.get("on_event_summary_packet")
+        on_co2_packet: Callable | None = userdata.get("on_co2_packet")
 
         payload: bytes = msg.payload
         topic: str = msg.topic
@@ -157,3 +171,7 @@ class ThreadedMQTTClient(Thread):
             event["old_event"] = event["current_event"]
             del event["current_event"]
             event["current_event"] = SensorEvent()
+        elif port == "15":
+            logging.info(">> Executing on_co2_packet")
+            if on_co2_packet:
+                on_co2_packet(event["current_event"])
