@@ -38,7 +38,7 @@ const SensorTable = () => {
     const [colDefs] = useState([
         { headerName: 'ID', field: 'id', flex: 1 },
         { headerName: 'DevEUI', field: 'devEUI', flex: 3 },
-        { headerName: 'Event Details', cellRenderer: ViewEventsButton, flex: 2 }
+        { headerName: 'Sensor Details', cellRenderer: ViewEventsButton, flex: 2 }
     ]);
 
     const defaultColDef = {
