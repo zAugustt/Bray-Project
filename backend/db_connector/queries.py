@@ -14,6 +14,7 @@ Date:
 
 from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo
 from mqtt_client.sensor_event import SensorEvent
+# from mqtt_client.aux_sensor_data import AuxSensorData
 from sqlalchemy import select, desc
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -221,9 +222,9 @@ def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int 
     flattened_torque_data, record_numbers, record_lengths = flatten_data(sensor_event)
 
     # update list of packets to hide if event summary reached
-    if ((eventType == 2) and (prev_sensor_event != None)):
-        hidden_packets = hide_duplicate_packets(flattened_torque_data, record_numbers, record_lengths, sensor_event.dataPacketPayloadCRCs,
-                                                *flatten_data(prev_sensor_event), prev_sensor_event.calculatedDataPacketPayloadCRCs)
+    # if ((eventType == 2) and (prev_sensor_event != None)):
+    #     hidden_packets = hide_duplicate_packets(flattened_torque_data, record_numbers, record_lengths, sensor_event.dataPacketPayloadCRCs,
+    #                                             *flatten_data(prev_sensor_event), prev_sensor_event.calculatedDataPacketPayloadCRCs)
 
     # Set streaming to false if event summary reached
     if eventType == 2:
@@ -260,6 +261,11 @@ def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int 
     existing_event.deviceInfo.openValveCount = sensor_event.openValveCount
     existing_event.deviceInfo.closeValveCount = sensor_event.closeValveCount
 
+def get_aux_sensors(session):
+    return
+
+def add_aux_sensor_data(session, aux_sensor_data: AuxSensorData):
+    return
 
 def get_sensors(session):
     """

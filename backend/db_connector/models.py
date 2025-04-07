@@ -34,7 +34,7 @@ class Sensor(Base):
 
     devEUI: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    auxSensorID: Mapped[int] = mapped_column(ForeignKey("aux_sensors.id"))
+    auxSensorID: Mapped[int] = mapped_column(ForeignKey("aux_sensors.id"), unique=True, nullable=True)
 
     events: Mapped[list["Event"]] = relationship(back_populates="sensor")
     aux_sensors: Mapped[list["AuxSensorData"]] = relationship(back_populates="sensor")
