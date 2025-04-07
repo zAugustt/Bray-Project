@@ -7,6 +7,7 @@ functions in the `DBConnector` class. The first argument of all queries should b
 Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
+    Aysen De La Cruz (aysen.dlc@tamu.edu), Texas A&M University
 
 Date:
     November 2024
@@ -261,11 +262,11 @@ def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int 
     existing_event.deviceInfo.openValveCount = sensor_event.openValveCount
     existing_event.deviceInfo.closeValveCount = sensor_event.closeValveCount
 
-def get_aux_sensors(session):
-    return
+# def get_aux_sensors(session):
+#     return
 
-def add_aux_sensor_data(session, aux_sensor_data: AuxSensorData):
-    return
+# def add_aux_sensor_data(session, aux_sensor_data: AuxSensorData):
+#     return
 
 def get_sensors(session):
     """

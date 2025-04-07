@@ -34,12 +34,21 @@ class Sensor(Base):
 
     devEUI: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    auxSensorID: Mapped[int] = mapped_column(ForeignKey("aux_sensors.id"), unique=True, nullable=True)
+    # auxSensorID: Mapped[int] = mapped_column(ForeignKey("aux_sensors_data.id"), unique=True, nullable=True)
 
     events: Mapped[list["Event"]] = relationship(back_populates="sensor")
-    aux_sensors: Mapped[list["AuxSensorData"]] = relationship(back_populates="sensor")
 
-
+class AuxSensor(Base):
+    """
+    Auxilary sensor entity containing datapoints.
+    """
+    
+    __tablename__ = "aux_sensors"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    data: Mapped[float] = mapped_column(Double, nullable=True)
+        
 
 class Event(Base):
     """
@@ -60,20 +69,6 @@ class Event(Base):
     deviceData: Mapped["DeviceData"] = relationship(back_populates="event")
     deviceTrendInfo: Mapped["DeviceTrendInfo"] = relationship(back_populates="event")
     sensor: Mapped["Sensor"] = relationship(back_populates="events")
-
-
-class AuxSensorData(Base):
-    """
-    Auxilary sensor data entity containing datapoints.
-    """
-
-    __tablename__ = "aux_sensors_data"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    data: Mapped[float] = mapped_column(Double, nullable=True)
-
-    sensor: Mapped["Sensor"] = relationship(back_populates="aux_sensor_datas")
 
 
 class DeviceInfo(Base):
