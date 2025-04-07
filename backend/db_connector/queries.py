@@ -13,7 +13,7 @@ Date:
     November 2024
 """
 
-from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo
+from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo, AuxSensor
 from mqtt_client.sensor_event import SensorEvent
 # from mqtt_client.aux_sensor_data import AuxSensorData
 from sqlalchemy import select, desc
@@ -262,8 +262,19 @@ def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int 
     existing_event.deviceInfo.openValveCount = sensor_event.openValveCount
     existing_event.deviceInfo.closeValveCount = sensor_event.closeValveCount
 
-# def get_aux_sensors(session):
-#     return
+def get_aux_sensors(session):
+    """
+    Returns a list of auxilary sensors.
+
+    Args:
+        session (_type_): Session object. See module header.
+
+    Returns:
+        List[AuxSenosr]: List of auxilary sensors containing `AuxSensor` objects.
+    """
+    return session.scalars(select(Sensor)
+                           .options(joinedload(AuxSensor.id))
+                           ).unique().all()
 
 # def add_aux_sensor_data(session, aux_sensor_data: AuxSensorData):
 #     return
