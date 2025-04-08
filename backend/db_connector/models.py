@@ -38,14 +38,27 @@ class Sensor(Base):
 
 class AuxSensor(Base):
     """
-    Auxilary sensor entity containing datapoints.
+    Auxiliary sensor entity containing sensors
     """
-    
     __tablename__ = "aux_sensors"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    
-    data: Mapped[float] = mapped_column(Double, nullable=False)
+
+    sensor_data: Mapped[list["AuxSensorData"]] = relationship(back_populates="sensor")
+
+
+class AuxSensorData(Base):
+    """
+    Auxiliary sensor data entity containing individual data points.
+    """
+    __tablename__ = "aux_sensor_data"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    aux_sensor_id: Mapped[int] = mapped_column(ForeignKey("aux_sensors.id"), nullable=False)
+    timestamp: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    value: Mapped[float] = mapped_column(Double, nullable=False)
+
+    sensor: Mapped["AuxSensor"] = relationship(back_populates="sensor_data")
         
 
 class Event(Base):
