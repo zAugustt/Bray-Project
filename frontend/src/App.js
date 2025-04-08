@@ -7,7 +7,8 @@ import {
 
 import SensorPage from './pages/SensorPage';       
 import EventPage from './pages/EventPage';       
-import EventDetailsPage from './pages/EventDetailsPage';       
+import EventDetailsPage from './pages/EventDetailsPage'; 
+import AuxSensorPage from './pages/AuxSensorPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/sensors" element={<SensorPage />} />
             <Route path="/events/:sensorId" element={<EventPage />} />
             <Route path="/events/:sensorId/event-details/:eventId" element={<EventDetailsPage />} />
+            <Route path="/aux_sensors/:auxSensorID" element={<AuxSensorPage />} />
         </Routes>
     </Router>
   );

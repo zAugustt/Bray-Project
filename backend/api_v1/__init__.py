@@ -41,7 +41,7 @@ api_v1 = Blueprint("api_v1", __name__)
 # Create database connection
 _conn = DBConnector()
 
-
+### Torque Sensor API ###
 @api_v1.route("/sensors")
 def sensors():
     """
@@ -140,6 +140,63 @@ def on_data_packet(sensor_event: SensorEvent):
 def on_event_summary_packet(sensor_event: SensorEvent, prev_sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 2, prev_sensor_event)
 
+### Auxilary Sensor API ###
+@api_v1.route("/devices", methods=["GET"])
+def devices():
+    """
+    Returns a JSON object containing a list of devices from the DeviceInfo table.
+    Returns:
+        JSON: List of devices with their details or an error message if something goes wrong.
+    """
+    try:
+        # Fetch all devices from the database
+        devices = _conn.execute_query_readonly(queries.getDevInfo)
+
+        # Format the device data
+        device_data = [
+            {
+                "id": device.id,
+                "sensorName": device.sensorname,  # Corrected to match the database schema
+                "serialNumber": device.serialnumber,  # Corrected
+                "deviceType": device.devicetype,  # Corrected
+                "deviceLocation": device.devicelocation,  # Corrected
+            }
+            for device in devices
+        ]
+
+        # Return the formatted data as JSON
+        return jsonify(device_data), 200
+
+    except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching devices: {e}")
+        return jsonify({"error": "Failed to fetch devices"}), 500
+
+"""
+@api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
+def device_events(sensor_id: int):
+    
+    Returns a JSON object containing a list of events, as well as trend data.
+    Args:
+        sensor_id (int): ID of sensor.
+    
+    try:
+        events = _conn.execute_query_readonly(queries.get_device_events, sensor_id)
+        event_data = [
+            {
+                "id": event.id,
+                "timestamp": event.timestamp,
+                "deviceDataID": event.devicedataid,
+                "deviceInfoID": event.deviceinfoid,
+            }
+            for event in events
+        ]
+        return jsonify(event_data), 200
+        except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching events: {e}")
+        return jsonify({"error": "Failed to fetch events"}), 500
+"""
 
 # Redundant code (deprecated by ThreadedMQTTClient)
 def on_message_complete(sensor_event: SensorEvent):
