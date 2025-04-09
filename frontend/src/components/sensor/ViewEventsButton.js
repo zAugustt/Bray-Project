@@ -13,25 +13,25 @@ const ViewEventsButton = (props) => {
 
   const handleClick = () => {
     // Redirect to /events with the selected row's data
-    if(props.data.auxSensorID) {
-      navigate(`/aux_sensors/${props.data.auxSensorID}`, { state: props.data })
-    } else {
+    if(props.data.devEUI) {
       navigate(`/events/${props.data.id}`, { state: { rowData: props.data } });
+    } else {
+      navigate(`/aux_sensors/${props.data.id}`, { state: props.data })
     }
     
   };
 
-  if(props.data.auxSensorID) {
+  if(props.data.devEUI) {
     return (
       <button className='view-details-btn' onClick={handleClick}>
-        View Data
+        View Events
       </button>
     );
   } else {
     return (
       <button className='view-details-btn' onClick={handleClick}>
-        View Events
-      </button>
+      View Data
+    </button>
     );
   }
   

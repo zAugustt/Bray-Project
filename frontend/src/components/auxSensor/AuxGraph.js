@@ -15,12 +15,12 @@ const fakeData = [0.00, 5.25, 10.33, 30.55, 80.99, 45.22, 62.77, 65.21, 82.47, 7
 
 const formattedData = fakeData.map((value, index) => ({
   index,
-  torque: value,
+  ppm: value,
 }));
 
 const gradientOffset = () => {
-  const dataMax = Math.max(...formattedData.map(i => i.torque));
-  const dataMin = Math.min(...formattedData.map(i => i.torque));
+  const dataMax = Math.max(...formattedData.map(i => i.ppm));
+  const dataMin = Math.min(...formattedData.map(i => i.ppm));
 
   if (dataMax <= 0) return 0;
   if (dataMin >= 0) return 1;
@@ -63,7 +63,7 @@ const AuxGraph = () => {
                 </defs>
                 <Area
                   type="monotone"
-                  dataKey="torque"
+                  dataKey="ppm"
                   stroke="#000"
                   fill="url(#splitColor)"
                 />
