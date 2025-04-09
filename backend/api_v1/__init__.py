@@ -31,6 +31,7 @@ from flask import Blueprint, jsonify, Response, request
 from db_connector import DBConnector, queries
 from mqtt_client import ThreadedMQTTClient
 from mqtt_client.sensor_event import SensorEvent
+from mqtt_client.aux_sensor_event import AuxSensorEvent
 import logging, csv
 from io import StringIO
 from .custom_csv import fetch_event_data, format_event_data, write_event_csv

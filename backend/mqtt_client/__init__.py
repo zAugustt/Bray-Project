@@ -23,6 +23,7 @@ from collections.abc import Callable
 import logging
 
 from .sensor_event import SensorEvent
+from .aux_sensor_event import AuxSensorEvent
 
 
 class ThreadedMQTTClient(Thread):
@@ -43,7 +44,7 @@ class ThreadedMQTTClient(Thread):
     on_data_packet: Callable[[SensorEvent], None] = None
     on_event_summary_packet: Callable[[SensorEvent], None] = None
     on_complete_event: Callable[[SensorEvent], None] = None
-    on_co2_packet: Callable[[int], None] = None #callback for CO2 sensor
+    on_co2_packet: Callable[[AuxSensorEvent], None] = None #callback for CO2 sensor
 
     # Broker Information
     broker: str = getenv("MQTT_HOST", "mosquitto")
