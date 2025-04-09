@@ -111,7 +111,7 @@ def hide_duplicate_packets(data: int, record_numbers: int, record_lengths: int, 
     return duplicate_packets
 
 
-def add_aux_sensor_data(session, aux_sensor_event :AuxSensorEvent):
+def add_aux_sensor_data(session, aux_sensor_event: AuxSensorEvent):
     """
     Adds a sensor event to the database. SensorEvent is initialized with default data.
 

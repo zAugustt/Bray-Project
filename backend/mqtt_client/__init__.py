@@ -169,8 +169,7 @@ class ThreadedMQTTClient(Thread):
             on_event_summary_packet(event["current_event"], event["old_event"]) if on_event_summary_packet is not None else None
         elif port == "15":
             logging.info(">> Executing on_co2_packet")
-            if on_co2_packet:
-                on_co2_packet(event["current_event"])
+            on_co2_packet(event["current_event"]) if on_co2_packet is not None else None
 
             # Clear out memory
             event["old_event"] = event["current_event"]
