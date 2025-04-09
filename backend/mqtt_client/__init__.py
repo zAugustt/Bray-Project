@@ -21,6 +21,8 @@ from os import getenv
 from typing import Dict, List, Any
 from collections.abc import Callable
 import logging
+from typing import Union
+
 
 from .sensor_event import SensorEvent
 from .aux_sensor_event import AuxSensorEvent
@@ -135,7 +137,7 @@ class ThreadedMQTTClient(Thread):
 
     @staticmethod
     def _on_message(client: mqtt.Client, userdata: Any, msg: MQTTMessage):
-        sensor_events: Dict[str, Dict[str, SensorEvent]] = userdata.get("sensor_events")
+        sensor_events: Dict[str, Dict[str, Union[SensorEvent, AuxSensorEvent]]] = userdata.get("sensor_events")
         on_heartbeat_packet: Callable | None = userdata.get("on_heartbeat_packet")
         on_data_packet: Callable | None = userdata.get("on_data_packet")
         on_event_summary_packet: Callable | None = userdata.get("on_event_summary_packet")
@@ -174,4 +176,4 @@ class ThreadedMQTTClient(Thread):
             # Clear out memory
             event["old_event"] = event["current_event"]
             del event["current_event"]
-            event["current_event"] = SensorEvent()
+            event["current_event"] = AuxSensorEvent() if port == "15" else SensorEvent()

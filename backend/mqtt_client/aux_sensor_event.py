@@ -83,7 +83,7 @@ class AuxSensorEvent:
             logging.warning("CO2 packet too short")
             return
 
-        bytes_as_str: str = data[3:7].decode("utf-8")
+        bytes_as_str: int= data[3:7].decode("utf-8")
         self.co2_ppm = int(bytes_as_str) 
         logging.info(f"Data as bytes: {data.hex()}")
         self.timestamp = datetime.now()
