@@ -13,8 +13,9 @@ Date:
     November 2024
 """
 
-from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo, AuxSensor
+from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo, AuxSensor, AuxSensorData
 from mqtt_client.sensor_event import SensorEvent
+from mqtt_client.aux_sensor_event import AuxSensorEvent
 # from mqtt_client.aux_sensor_data import AuxSensorData
 from sqlalchemy import select, desc
 from sqlalchemy.orm import joinedload
@@ -105,7 +106,34 @@ def hide_duplicate_packets(data: int, record_numbers: int, record_lengths: int, 
         index      -= 1
         prev_index -= 1
     return duplicate_packets
+def add_aux_sensor_data(session, aux_sensor_event :AuxSensorEvent):
+    """
+    Adds a sensor event to the database. SensorEvent is initialized with default data.
 
+    Args:
+        session (_type_): Session object. See module header.
+        sensor_event (SensorEvent): Event that will be added to database
+    """
+    logging.info("Attempting to add aux_sensor data")
+    
+    # Get Aux sensor ID to make sure it exists in database
+    sensor_id = int(aux_sensor_event.aux_sensor_id, 16)
+    # Check if the AuxSensor exists
+    existing_sensor = session.get(AuxSensor, sensor_id)
+    if existing_sensor is None:
+        logging.info(f"AuxSensor with ID {sensor_id} not found. Creating new entry.")
+        new_sensor = AuxSensor(id=sensor_id)
+        session.add(new_sensor)
+        session.flush()
+    
+    aux_sensor_data = AuxSensorData(
+        aux_sensor_id = aux_sensor_event.aux_sensor_id,
+        timestamp = aux_sensor_event.timestamp,
+        value = aux_sensor_event.co2_ppm
+    )
+
+    # Add session to db (also adds other entities)
+    session.add(aux_sensor_data)
 
 def add_sensor_event(session, sensor_event: SensorEvent):
     """

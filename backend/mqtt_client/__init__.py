@@ -115,8 +115,8 @@ class ThreadedMQTTClient(Thread):
             logging.error(f"Could not connect to MQTT broker {self.broker} with error: {e}")
 
         # Start CO2 sensor monitoring
-        if self.co2_sensor:
-            Thread(target=self._monitor_co2, daemon=True).start()
+        #if self.co2_sensor:
+        #    Thread(target=self._monitor_co2, daemon=True).start()
 
         # Start polling (blocking)
         logging.info(f">> Looping forever!!!")
@@ -151,7 +151,7 @@ class ThreadedMQTTClient(Thread):
         if sensor_events.get(devEUI) is None:
             sensor_events[devEUI] = {
                 "old_event": None,
-                "current_event": SensorEvent()
+                "current_event": AuxSensorEvent() if port == "15" else SensorEvent()
             }
 
         # Parse data for the current event
@@ -167,12 +167,12 @@ class ThreadedMQTTClient(Thread):
         elif port == "14":
             logging.info(">> Executing on_event_summary_packet")
             on_event_summary_packet(event["current_event"], event["old_event"]) if on_event_summary_packet is not None else None
+        elif port == "15":
+            logging.info(">> Executing on_co2_packet")
+            if on_co2_packet:
+                on_co2_packet(event["current_event"])
 
             # Clear out memory
             event["old_event"] = event["current_event"]
             del event["current_event"]
             event["current_event"] = SensorEvent()
-        elif port == "15":
-            logging.info(">> Executing on_co2_packet")
-            if on_co2_packet:
-                on_co2_packet(event["current_event"])

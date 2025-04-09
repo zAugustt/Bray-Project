@@ -137,6 +137,8 @@ def on_heartbeat_packet(sensor_event: SensorEvent):
 def on_data_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 1)
 
+def on_c02_packet(aux_sensor_event:AuxSensorEvent):
+    _conn.execute_query(queries.add_aux_sensor_data, aux_sensor_event, 1)
 
 def on_event_summary_packet(sensor_event: SensorEvent, prev_sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 2, prev_sensor_event)
@@ -204,5 +206,5 @@ def on_message_complete(sensor_event: SensorEvent):
     _conn.execute_query(queries.add_sensor_event, sensor_event)
 
 
-threaded_client = ThreadedMQTTClient(on_heartbeat_packet, on_data_packet, on_event_summary_packet, on_message_complete)
+threaded_client = ThreadedMQTTClient(on_heartbeat_packet, on_data_packet, on_event_summary_packet, on_message_complete,on_c02_packet)
 threaded_client.start()

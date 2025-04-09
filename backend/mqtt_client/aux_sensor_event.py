@@ -34,6 +34,9 @@ class AuxSensorEvent:
     
     #CO2 sensor field
     co2_ppm: int = None 
+    
+    #hardcoding the aux sensor data
+    aux_sensor_id: int =6
 
     def __init__(self):
         self.timestamp = None
