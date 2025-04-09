@@ -7,15 +7,19 @@ functions in the `DBConnector` class. The first argument of all queries should b
 Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
+
     Aysen De La Cruz (aysen.dlc@tamu.edu), Texas A&M University
+    Josh Werner (joshdwerner2@tamu.edu), Texas A&M University
 
 Date:
     November 2024
+
+    March 2025
 """
 
-from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo, AuxSensor
+from .models import Sensor, Event, DeviceData, DeviceInfo, DeviceTrendInfo, AuxSensor, AuxSensorData
 from mqtt_client.sensor_event import SensorEvent
-# from mqtt_client.aux_sensor_data import AuxSensorData
+from mqtt_client.aux_sensor_event import AuxSensorEvent
 from sqlalchemy import select, desc
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -105,6 +109,37 @@ def hide_duplicate_packets(data: int, record_numbers: int, record_lengths: int, 
         index      -= 1
         prev_index -= 1
     return duplicate_packets
+
+
+def add_aux_sensor_data(session, aux_sensor_event :AuxSensorEvent):
+    """
+    Adds a sensor event to the database. SensorEvent is initialized with default data.
+
+    Args:
+        session (_type_): Session object. See module header.
+        sensor_event (SensorEvent): Event that will be added to database
+    """
+    logging.info("Attempting to add aux_sensor data")
+    
+    # Get Aux sensor ID to make sure it exists in database
+    sensor_id = aux_sensor_event.aux_sensor_id
+
+    # Check if the AuxSensor exists
+    existing_sensor = session.get(AuxSensor, sensor_id)
+    if existing_sensor is None:
+        logging.info(f"AuxSensor with ID {sensor_id} not found. Creating new entry.")
+        new_sensor = AuxSensor(id=sensor_id)
+        session.add(new_sensor)
+        session.flush()
+    
+    aux_sensor_data = AuxSensorData(
+        aux_sensor_id = aux_sensor_event.aux_sensor_id,
+        timestamp = aux_sensor_event.timestamp,
+        value = aux_sensor_event.co2_ppm
+    )
+
+    # Add session to db (also adds other entities)
+    session.add(aux_sensor_data)
 
 
 def add_sensor_event(session, sensor_event: SensorEvent):
@@ -262,6 +297,7 @@ def upsert_live_sensor_event(session, sensor_event: SensorEvent, eventType: int 
     existing_event.deviceInfo.openValveCount = sensor_event.openValveCount
     existing_event.deviceInfo.closeValveCount = sensor_event.closeValveCount
 
+
 def get_aux_sensors(session):
     """
     Returns a list of auxilary sensors.
@@ -276,8 +312,6 @@ def get_aux_sensors(session):
                            .options(joinedload(AuxSensor.id))
                            ).unique().all()
 
-# def add_aux_sensor_data(session, aux_sensor_data: AuxSensorData):
-#     return
 
 def get_sensors(session):
     """
