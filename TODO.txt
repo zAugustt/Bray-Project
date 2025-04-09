@@ -8,6 +8,19 @@ docker exec -it bray-project-backend-1 python /app/db_connector/data_gen.py
 
 * Fixing garbage alembic versions 
 
+Clear databsae with 
+
+```
+DO $$ 
+BEGIN
+    EXECUTE (
+        SELECT string_agg('DROP TABLE IF EXISTS "' || tablename || '" CASCADE;', ' ')
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    );
+END $$;
+```
+
 Delete all versions in alembic
 
 docker exec -it bray-project-backend-1 alembic revision --autogenerate -m "Initial migration"
