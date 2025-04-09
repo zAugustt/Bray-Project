@@ -133,12 +133,11 @@ def event_download(sensor_id, event_id):
 def on_heartbeat_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 0)
 
-
 def on_data_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 1)
 
 def on_c02_packet(aux_sensor_event:AuxSensorEvent):
-    _conn.execute_query(queries.add_aux_sensor_data, aux_sensor_event, 1)
+    _conn.execute_query(queries.add_aux_sensor_data, aux_sensor_event)
 
 def on_event_summary_packet(sensor_event: SensorEvent, prev_sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 2, prev_sensor_event)
