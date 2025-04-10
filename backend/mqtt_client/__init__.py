@@ -151,11 +151,15 @@ class ThreadedMQTTClient(Thread):
         logging.info(f">> RECEIVED MESSAGE ON PORT {port}")
 
         # Add a new sensor event if it doesn't exist or get the existing one. Start with an empty current event
-        if sensor_events.get(devEUI) is None:
-            sensor_events[devEUI] = {
-                "old_event": None,
-                "current_event": AuxSensorEvent() if port == "15" else SensorEvent()
-            }
+        if devEUI not in sensor_events:
+            sensor_events[devEUI] = {"old_event": None, "current_event": None}
+
+        event = sensor_events[devEUI]
+
+        if port == "15":
+            event["current_event"] = AuxSensorEvent()
+        else:
+            event["current_event"] = SensorEvent()
 
         # Parse data for the current event
         event = sensor_events[devEUI]
@@ -174,7 +178,6 @@ class ThreadedMQTTClient(Thread):
             logging.info(">> Executing on_co2_packet")
             on_co2_packet(event["current_event"]) if on_co2_packet is not None else None
 
-            # Clear out memory
-            event["old_event"] = event["current_event"]
-            del event["current_event"]
-            event["current_event"] = AuxSensorEvent() if port == "15" else SensorEvent()
+        # Clear out memory
+        event["old_event"] = event["current_event"]
+        event["current_event"] = None
