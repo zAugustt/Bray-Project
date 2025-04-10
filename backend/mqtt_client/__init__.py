@@ -6,6 +6,7 @@ This module provides a `ThreadedMQTTClient` to capture and interpret messages se
 Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
+    Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
 
 Date:
     November 2024
@@ -21,6 +22,8 @@ from os import getenv
 from typing import Dict, List, Any
 from collections.abc import Callable
 import logging
+from typing import Union
+
 
 from .sensor_event import SensorEvent
 from .aux_sensor_event import AuxSensorEvent
@@ -135,7 +138,7 @@ class ThreadedMQTTClient(Thread):
 
     @staticmethod
     def _on_message(client: mqtt.Client, userdata: Any, msg: MQTTMessage):
-        sensor_events: Dict[str, Dict[str, SensorEvent]] = userdata.get("sensor_events")
+        sensor_events: Dict[str, Dict[str, Union[SensorEvent, AuxSensorEvent]]] = userdata.get("sensor_events")
         on_heartbeat_packet: Callable | None = userdata.get("on_heartbeat_packet")
         on_data_packet: Callable | None = userdata.get("on_data_packet")
         on_event_summary_packet: Callable | None = userdata.get("on_event_summary_packet")
@@ -153,7 +156,6 @@ class ThreadedMQTTClient(Thread):
                 "old_event": None,
                 "current_event": AuxSensorEvent() if port == "15" else SensorEvent()
             }
-
         # Parse data for the current event
         event = sensor_events[devEUI]
         event["current_event"].parse_from_data(topic, payload)
@@ -167,12 +169,11 @@ class ThreadedMQTTClient(Thread):
         elif port == "14":
             logging.info(">> Executing on_event_summary_packet")
             on_event_summary_packet(event["current_event"], event["old_event"]) if on_event_summary_packet is not None else None
+            event["old_event"] = event["current_event"]
+            del event["current_event"]
+            event["current_event"] = AuxSensorEvent()
         elif port == "15":
             logging.info(">> Executing on_co2_packet")
-            if on_co2_packet:
-                on_co2_packet(event["current_event"])
-
-            # Clear out memory
-            event["old_event"] = event["current_event"]
+            on_co2_packet(event["current_event"]) if on_co2_packet is not None else None
             del event["current_event"]
             event["current_event"] = SensorEvent()

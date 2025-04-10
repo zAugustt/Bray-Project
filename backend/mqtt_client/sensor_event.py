@@ -111,8 +111,6 @@ class SensorEvent:
                 self.parse_from_data_record(data)
             case "14":
                 self.parse_from_event_summary_record(data)
-            case "15":
-                self.parse_from_co2_record(data)
             case _:
                 raise SyntaxError(f"Unrecognized packet from port {port}")
 
@@ -203,28 +201,7 @@ class SensorEvent:
         self.calculatedHeartbeatRecordPayloadCRC = CRC16_CCITT(data[:-2])
         if self.calculatedHeartbeatRecordPayloadCRC != self.heartbeatRecordPayloadCRC:
             logging.warning(f"Heartbeat record CRCs do not match. Actual: {self.heartbeatRecordPayloadCRC} Calculated: {self.calculatedHeartbeatRecordPayloadCRC}")
-    
-    def parse_from_co2_record(self, data: bytes) -> None:
-        """
-        Interprets byte data as a CO2 record.
-        TODO: Adjust according to data packet length 
-        Args:
-            data (bytes): Payload containing CO2 concentration (ppm)
-        """
-        logging.debug("Loading CO2 record...")
-        if len(data) < 8:
-            logging.warning("CO2 packet too short")
-            return
-
-        self.co2_ppm = unpack("<H", data[3:5])[0] #
-        self.co2PayloadCRC = unpack("<H", data[-2:])[0]
-        self.calculatedCo2PayloadCRC = CRC16_CCITT(data[:-2])
-        logging.info(f"CO2 parsed: {self.co2_ppm} ppm")
-
-        if self.co2PayloadCRC != self.calculatedCo2PayloadCRC:
-            logging.warning(f"CO2 record CRCs do not match. Actual: {self.co2PayloadCRC} Calculated: {self.calculatedCo2PayloadCRC}")
-        else:
-            logging.info(f"Parsed CO2 ppm: {self.co2_ppm}")
+            
 
     def __repr__(self) -> str:
         return "{}({!r})".format(self.__class__.__name__, self.__dict__)

@@ -36,7 +36,7 @@ class AuxSensorEvent:
     co2_ppm: int = None 
     
     #hardcoding the aux sensor data
-    aux_sensor_id: int =6
+    aux_sensor_id: int = 6
 
     def __init__(self):
         self.timestamp = None
@@ -83,11 +83,11 @@ class AuxSensorEvent:
             logging.warning("CO2 packet too short")
             return
 
-        self.co2_ppm = int.from_bytes(data[3:7], byteorder="big", signed=True)
+        self.co2_ppm =  data[3:8].decode("utf-8")
+        logging.info(f"Data as bytes: {data.hex()}")
         self.timestamp = datetime.now()
         logging.info(f"CO2 parsed: {self.co2_ppm} ppm")
         
-        logging.info(f"Parsed CO2 ppm: {self.co2_ppm}")
 
     def __repr__(self) -> str:
         return "{}({!r})".format(self.__class__.__name__, self.__dict__)

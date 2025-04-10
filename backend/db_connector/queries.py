@@ -8,7 +8,7 @@ Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
 
-    Aysen De La Cruz (aysen.dlc@tamu.edu), Texas A&M University
+    Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
     Josh Werner (joshdwerner2@tamu.edu), Texas A&M University
 
 Date:
@@ -111,7 +111,7 @@ def hide_duplicate_packets(data: int, record_numbers: int, record_lengths: int, 
     return duplicate_packets
 
 
-def add_aux_sensor_data(session, aux_sensor_event :AuxSensorEvent):
+def add_aux_sensor_data(session, aux_sensor_event: AuxSensorEvent):
     """
     Adds a sensor event to the database. SensorEvent is initialized with default data.
 
@@ -198,14 +198,7 @@ def add_sensor_event(session, sensor_event: SensorEvent):
 
     # Create event entity
     event = Event(
-        timestamp=datetime(
-            sensor_event.year,
-            sensor_event.month,
-            sensor_event.day,
-            hour=sensor_event.hour,
-            minute=sensor_event.minute,
-            second=sensor_event.second,
-        ),
+        timestamp=datetime.now(),
         deviceInfo = device_info,
         deviceData = device_data,
         deviceTrendInfo = device_trend_info,
