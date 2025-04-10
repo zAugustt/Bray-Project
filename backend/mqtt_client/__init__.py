@@ -156,6 +156,7 @@ class ThreadedMQTTClient(Thread):
                 "old_event": None,
                 "current_event": AuxSensorEvent() if port == "15" else SensorEvent()
             }
+        
         # Parse data for the current event
         event = sensor_events[devEUI]
         event["current_event"].parse_from_data(topic, payload)
@@ -171,8 +172,8 @@ class ThreadedMQTTClient(Thread):
             on_event_summary_packet(event["current_event"], event["old_event"]) if on_event_summary_packet is not None else None
             event["old_event"] = event["current_event"]
             del event["current_event"]
-            event["current_event"] = AuxSensorEvent()
         elif port == "15":
+            event["current_event"] = AuxSensorEvent()
             logging.info(">> Executing on_co2_packet")
             on_co2_packet(event["current_event"]) if on_co2_packet is not None else None
             del event["current_event"]
