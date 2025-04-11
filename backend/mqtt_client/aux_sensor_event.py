@@ -86,7 +86,7 @@ class AuxSensorEvent:
         self.co2_ppm =  data[3:8].decode("utf-8")
         logging.info(f"Data as bytes: {data.hex()}")
         self.timestamp = datetime.now()
-        logging.info(f"CO2 parsed: {self.co2_ppm} ppm")
+        logging.info(f"CO2 parsed (XX.XXX %): {self.co2_ppm} % ")
         
 
     def __repr__(self) -> str:
