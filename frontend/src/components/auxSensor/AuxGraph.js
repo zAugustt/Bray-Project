@@ -15,12 +15,6 @@ import { useAuxData } from '../../apiServices';
 
 const fakeData = [0.00, 5.25, 10.33, 30.55, 80.99, 45.22, 62.77, 65.21, 82.47, 74.33];
 
-
-
-const xAxisTicks = formattedData.map((_, index) => index).filter(index => index % 1 === 0);;
-
-const off = gradientOffset();
-
 const AuxGraph = () => {
     const { auxSensorID } = useParams();
     const { data, refreshData } = useAuxData(auxSensorID);
@@ -33,6 +27,10 @@ const AuxGraph = () => {
       if (dataMin >= 0) return 1;
       return dataMax / (dataMax - dataMin);
     };
+
+    const xAxisTicks = data.map((_, index) => index).filter(index => index % 1 === 0);
+
+    const off = gradientOffset();
 
     return (
       <>
