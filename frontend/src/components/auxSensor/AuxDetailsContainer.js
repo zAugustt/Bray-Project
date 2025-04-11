@@ -1,20 +1,17 @@
 import AuxGraph from "./AuxGraph";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuxData } from "../../apiServices";
 
 const AuxDetailsContainer = () => {
     const { auxSensorID } = useParams();
+    const { auxData, refreshData } = useAuxData(auxSensorID);
     const [timestamp, setTimestamp] = useState('N/A');
     const navigate = useNavigate();
 
-    /*useEffect(() => {
-        if(sensorEvents.event_datas){
-            setTimestamp(sensorEvents.event_datas[eventId-1].timestamp);
-        }
-        if(sensorData[sensorId-1]){
-            setNumEvents(sensorData[sensorId - 1].numEvents);
-        }
-    }, [sensorEvents, sensorData, eventId]);*/
+    useEffect(() => {
+        setTimestamp(auxData.timestamp);
+    }, [auxData]);
 
     const handleGoBack = () => {
         navigate(`/sensors`);

@@ -69,6 +69,32 @@ export const useSensorEvents = (sensorId) => {
     return { sensorEvents, refreshData: fetchData };
 };
 
+export const useAuxData = (sensorId) => {
+    const [data, setData] = useState([]);
+
+    const fetchData = () => {
+        const url = `http://localhost:5001/api_v1/sensors/${sensorId}/data`;
+        
+        fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data_ => {
+            setData(data_);
+        })
+        .catch(error => console.error("Error fetching data:", error))
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, [sensorId])
+
+    return { data, refreshData: fetchData }
+}
+
 /**
  * Custom Hook: useEventDetails
  * 

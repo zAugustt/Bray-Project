@@ -51,7 +51,10 @@ def sensors():
     sensor.
     """
     sensors = _conn.execute_query_readonly(queries.get_sensors)
+    auxSensors = _conn.execute_query_readonly(queries.get_aux_sensors)
     sensor_datas = [{"id": sensor.id, "devEUI": sensor.devEUI, "numEvents": len(sensor.events)} for sensor in sensors]
+    aux_sensor_datas = [{"id": sensor.id} for sensor in auxSensors]
+    sensor_datas.append(aux_sensor_datas)
     return jsonify(sensor_datas)
 
 
@@ -174,6 +177,23 @@ def devices():
         # Log the error and return a 500 response
         logging.error(f"Error fetching devices: {e}")
         return jsonify({"error": "Failed to fetch devices"}), 500
+
+@api_v1.route("/sensors/<int:sensor_id>/data", methods=["GET"])
+def aux_sensor_data(sensor_id: int):
+    """
+    Returns a json object containing the list of data points tied to a sensor
+    Args:
+        sensor_id (int): ID of sensor.
+    """
+    try:
+        data = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
+        auxData = [
+            {
+                "id": data.id
+                "timestamp": data.timestamp,
+                "ppm": data.value
+            }
+        ]
 
 """
 @api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
