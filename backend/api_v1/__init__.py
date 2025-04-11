@@ -51,10 +51,14 @@ def sensors():
     sensor.
     """
     sensors = _conn.execute_query_readonly(queries.get_sensors)
-    auxSensors = _conn.execute_query_readonly(queries.get_aux_sensors)
     sensor_datas = [{"id": sensor.id, "devEUI": sensor.devEUI, "numEvents": len(sensor.events)} for sensor in sensors]
-    aux_sensor_datas = [{"id": sensor.id} for sensor in auxSensors]
-    sensor_datas.append(aux_sensor_datas)
+    return jsonify(sensor_datas)
+
+@api_v1.route("/aux_sensors")
+def aux_sensors():
+
+    sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
+    sensor_datas = [{"id": sensor.id} for sensor in sensors]
     return jsonify(sensor_datas)
 
 
