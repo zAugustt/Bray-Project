@@ -300,8 +300,8 @@ def get_aux_sensors(session):
     Returns:
         List[AuxSenosr]: List of auxilary sensors containing `AuxSensor` objects.
     """
-    return session.scalars(select(Sensor)
-                           .options(joinedload(AuxSensor.id))
+    return session.scalars(select(AuxSensor)
+                           .options(joinedload(AuxSensor.sensor_data))
                            ).unique().all()
 
 

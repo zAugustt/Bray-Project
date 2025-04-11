@@ -194,6 +194,7 @@ def aux_sensor_data(sensor_id: int):
                 "ppm": data.value
             }
         ]
+        return jsonify(auxData), 200
 
 """
 @api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])

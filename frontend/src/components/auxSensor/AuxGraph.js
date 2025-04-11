@@ -10,22 +10,12 @@ import {
 } from 'recharts';
 import '../../styles/event-details.css';
 import { useParams } from 'react-router-dom';
+import { useAuxData } from '../../apiServices';
+
 
 const fakeData = [0.00, 5.25, 10.33, 30.55, 80.99, 45.22, 62.77, 65.21, 82.47, 74.33];
 
-const formattedData = fakeData.map((value, index) => ({
-  index,
-  ppm: value,
-}));
 
-const gradientOffset = () => {
-  const dataMax = Math.max(...formattedData.map(i => i.ppm));
-  const dataMin = Math.min(...formattedData.map(i => i.ppm));
-
-  if (dataMax <= 0) return 0;
-  if (dataMin >= 0) return 1;
-  return dataMax / (dataMax - dataMin);
-};
 
 const xAxisTicks = formattedData.map((_, index) => index).filter(index => index % 1 === 0);;
 
@@ -33,7 +23,17 @@ const off = gradientOffset();
 
 const AuxGraph = () => {
     const { auxSensorID } = useParams();
-    //const { sensorData, setSensorData } = 
+    const { data, refreshData } = useAuxData(auxSensorID);
+    
+    const gradientOffset = () => {
+      const dataMax = Math.max(...data.map(i => i.ppm));
+      const dataMin = Math.min(...data.map(i => i.ppm));
+    
+      if (dataMax <= 0) return 0;
+      if (dataMin >= 0) return 1;
+      return dataMax / (dataMax - dataMin);
+    };
+
     return (
       <>
       <div className='download-button-container'>
@@ -43,7 +43,7 @@ const AuxGraph = () => {
     </div>
       <ResponsiveContainer width="100%" height="90%">
               <AreaChart
-                data={formattedData}
+                data={data}
                 margin={{
                   top: 10,
                   right: 30,
