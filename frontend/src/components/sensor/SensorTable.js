@@ -29,7 +29,7 @@ const SensorTable = () => {
 
     useEffect(() => {
         if(sensorData) {
-            setRowData(...sensorData, ...auxSensorData);
+            setRowData([...sensorData || [], ...auxSensorData || []]);
         }
     }, [sensorData, auxSensorData]);
 

@@ -13,7 +13,7 @@ const ViewEventsButton = (props) => {
 
   const handleClick = () => {
     // Redirect to /events with the selected row's data
-    if(props.data.devEUI) {
+    if(props.data.devEUI !== "N/A") {
       navigate(`/events/${props.data.id}`, { state: { rowData: props.data } });
     } else {
       navigate(`/aux_sensors/${props.data.id}`, { state: props.data })
@@ -21,7 +21,7 @@ const ViewEventsButton = (props) => {
     
   };
 
-  if(props.data.devEUI) {
+  if(props.data.devEUI !== "N/A") {
     return (
       <button className='view-details-btn' onClick={handleClick}>
         View Events

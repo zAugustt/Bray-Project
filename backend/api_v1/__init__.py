@@ -58,7 +58,7 @@ def sensors():
 def aux_sensors():
 
     sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
-    sensor_datas = [{"id": sensor.id} for sensor in sensors]
+    sensor_datas = [{"id": sensor.id, "devEUI": "N/A", "numEvents": -1} for sensor in sensors]
     return jsonify(sensor_datas)
 
 
@@ -189,16 +189,16 @@ def aux_sensor_data(sensor_id: int):
     Args:
         sensor_id (int): ID of sensor.
     """
-    try:
-        data = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
-        auxData = [
-            {
-                "id": data.id
-                "timestamp": data.timestamp,
-                "ppm": data.value
-            }
-        ]
-        return jsonify(auxData), 200
+    
+    data = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
+    auxData = [
+        {
+            "id": data.id,
+            "timestamp": data.timestamp,
+            "ppm": data.value
+        }
+    ]
+    return jsonify(auxData), 200
 
 """
 @api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
