@@ -10,25 +10,26 @@ import {
 } from 'recharts';
 import '../../styles/event-details.css';
 import { useParams } from 'react-router-dom';
-import { useAuxData } from '../../apiServices';
 
-
-const fakeData = [0.00, 5.25, 10.33, 30.55, 80.99, 45.22, 62.77, 65.21, 82.47, 74.33];
-
-const AuxGraph = () => {
+const AuxGraph = ({ auxData }) => {
     const { auxSensorID } = useParams();
-    const { data, refreshData } = useAuxData(auxSensorID);
-    
+    //const { data } = useAuxData(auxSensorID);
+
+    const formattedData = auxData.map((dataPoint, index) => ({
+      index,
+      percentage: dataPoint.percentage / 1000.0, 
+  }));
+
     const gradientOffset = () => {
-      const dataMax = Math.max(...data.map(i => i.ppm));
-      const dataMin = Math.min(...data.map(i => i.ppm));
+      const dataMax = Math.max(...formattedData.map(i => i.percentage));
+      const dataMin = Math.min(...formattedData.map(i => i.percentage));
     
       if (dataMax <= 0) return 0;
       if (dataMin >= 0) return 1;
       return dataMax / (dataMax - dataMin);
-    };
+    }; 
 
-    const xAxisTicks = data.map((_, index) => index).filter(index => index % 1 === 0);
+    const xAxisTicks = formattedData.map((_, index) => index).filter(index => index % 1 === 0);
 
     const off = gradientOffset();
 
@@ -36,12 +37,11 @@ const AuxGraph = () => {
       <>
       <div className='download-button-container'>
       <h3 className='column-title'> Aux Sensor {auxSensorID} Signature Data</h3>
-        
       
     </div>
       <ResponsiveContainer width="100%" height="90%">
               <AreaChart
-                data={data}
+                data={formattedData}
                 margin={{
                   top: 10,
                   right: 30,
@@ -51,7 +51,7 @@ const AuxGraph = () => {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="index" ticks ={xAxisTicks}  label={{ value: 'Data Points', position: 'insideBottom', offset: -10 }} />
-                <YAxis  label={{ value: 'CO2 (ppm)', angle: -90, position: 'insideLeft' }} />
+                <YAxis  label={{ value: 'CO2 (%)', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
                 <defs>
                   <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
@@ -61,7 +61,7 @@ const AuxGraph = () => {
                 </defs>
                 <Area
                   type="monotone"
-                  dataKey="ppm"
+                  dataKey="percentage"
                   stroke="#000"
                   fill="url(#splitColor)"
                 />

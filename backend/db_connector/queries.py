@@ -344,7 +344,8 @@ def get_aux_sensor_data(session, sensor_id: int):
         session (_type_): Session object. See module header.
         sensor_id (int): ID of a sensor
     """
-    return session.scalars(select(AuxSensorData).filter_by(aux_sensor_id=sensor_id).options(joinedload(AuxSensorData.sensor))).all()
+    return session.scalars(select(AuxSensorData).filter_by(aux_sensor_id=sensor_id)).all()
+
 
 def get_event(session, sensor_id: int, event_id: int):
     """

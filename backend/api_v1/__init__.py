@@ -190,15 +190,16 @@ def aux_sensor_data(sensor_id: int):
         sensor_id (int): ID of sensor.
     """
     
-    data = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
+    datas = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
     auxData = [
         {
             "id": data.id,
             "timestamp": data.timestamp,
-            "ppm": data.value
+            "percentage": data.value
         }
+        for data in datas
     ]
-    return jsonify(auxData), 200
+    return jsonify(auxData)
 
 """
 @api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])

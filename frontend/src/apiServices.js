@@ -94,7 +94,7 @@ export const useSensorEvents = (sensorId) => {
 };
 
 export const useAuxData = (sensorId) => {
-    const [data, setData] = useState([]);
+    const [auxData, setAuxData] = useState([]);
 
     const fetchData = () => {
         const url = `http://localhost:5001/api_v1/sensors/${sensorId}/data`;
@@ -106,8 +106,8 @@ export const useAuxData = (sensorId) => {
             }
             return response.json();
         })
-        .then(data_ => {
-            setData(data_);
+        .then(data => {
+            setAuxData(data);
         })
         .catch(error => console.error("Error fetching data:", error))
     }
@@ -116,7 +116,7 @@ export const useAuxData = (sensorId) => {
         fetchData();
     }, [sensorId])
 
-    return { data, refreshData: fetchData }
+    return { auxData, refreshData: fetchData }
 }
 
 /**
