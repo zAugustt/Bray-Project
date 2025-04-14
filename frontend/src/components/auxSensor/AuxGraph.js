@@ -51,9 +51,14 @@ const AuxGraph = ({ auxData }) => {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="timestamp" ticks ={xAxisTicks}  label={{ value: 'Timestamp', position: 'insideBottom', offset: -10 }} />
+                <XAxis dataKey="index" ticks ={xAxisTicks}  label={{ value: 'Timestamp', position: 'insideBottom', offset: -10 }} />
                 <YAxis  label={{ value: 'CO2 (%)', angle: -90, position: 'insideLeft' }} />
-                <Tooltip />
+                <Tooltip 
+                formatter={(value, name, props) => {
+                  const { payload } = props;
+                  return [`${value}`, `Timestamp: ${payload.timestamp}`];
+                }}
+                />
                 <defs>
                   <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
                     <stop offset={off} stopColor="green" stopOpacity={1} />
