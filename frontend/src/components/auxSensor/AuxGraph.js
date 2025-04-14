@@ -17,6 +17,7 @@ const AuxGraph = ({ auxData }) => {
 
     const formattedData = auxData.map((dataPoint, index) => ({
       index,
+      timestamp: dataPoint.timestamp,
       percentage: dataPoint.percentage / 1000.0, 
   }));
 
@@ -50,7 +51,7 @@ const AuxGraph = ({ auxData }) => {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="index" ticks ={xAxisTicks}  label={{ value: 'Data Points', position: 'insideBottom', offset: -10 }} />
+                <XAxis dataKey="timestamp" ticks ={xAxisTicks}  label={{ value: 'Timestamp', position: 'insideBottom', offset: -10 }} />
                 <YAxis  label={{ value: 'CO2 (%)', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
                 <defs>
