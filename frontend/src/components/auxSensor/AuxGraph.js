@@ -56,8 +56,9 @@ const AuxGraph = ({ auxData }) => {
                 <Tooltip 
                 formatter={(value, name, props) => {
                   const { payload } = props;
-                  return [`${value}`, `Timestamp: ${payload.timestamp}`];
+                  return [`CO2: ${value}%\nTimestamp: ${payload.timestamp}`];
                 }}
+                labelFormatter={() => ''}
                 />
                 <defs>
                   <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
