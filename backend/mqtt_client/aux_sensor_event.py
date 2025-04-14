@@ -8,7 +8,6 @@ Authors:
     Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
     Josh Werner (joshdwerner2@gmail.com), Texas A&M University
 
-
 Date:
     November 2024
 """
