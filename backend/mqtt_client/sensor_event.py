@@ -72,9 +72,6 @@ class SensorEvent:
     # Stream
     isStreaming: bool = False
 
-    #CO2 sensor field
-    co2_ppm: int = None 
-
     def __init__(self):
         self.torqueData = []
         self.dataPacketPayloadCRCs = []

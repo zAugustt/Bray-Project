@@ -33,7 +33,7 @@ class AuxSensorEvent:
     devEUI: str = None
     
     #CO2 sensor field
-    co2_ppm: int = None 
+    co2_ppm: int = None #Data is in percentage not ppm
     
     #hardcoding the aux sensor data
     aux_sensor_id: int = 6
