@@ -58,7 +58,7 @@ def sensors():
 def aux_sensors():
 
     sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
-    sensor_datas = [{"id": sensor.id, "devEUI": "N/A", "numEvents": -1} for sensor in sensors]
+    sensor_datas = [{"id": sensor.id, "devEUI": "39-33-33-32-56-32-78-14", "numEvents": -1} for sensor in sensors]
     return jsonify(sensor_datas)
 
 
