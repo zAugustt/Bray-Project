@@ -41,9 +41,6 @@ const AuxDetailsContainer = () => {
                 <div className='column left-column'>
                     <AuxGraph auxData={auxData}/>
                 </div>
-                <div className='column right-column'>
-                    {/*<PacketInfo hidden={hidden}/>*/}
-                </div>
             </div>
         </div>
     );
