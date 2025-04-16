@@ -5,17 +5,15 @@ This module provides a `ThreadedMQTTClient` to capture and interpret messages se
 
 Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
-    Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
-    
+    Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University   
     Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
-
     Alex Kearney (akearney2001@gmail.com), Texas A&M University
-
     Josh Werner (joshdwerner2@gmail.com), Texas A&M University
 
 
 Date:
     November 2024
+    March 2025
 """
 
 import paho.mqtt.client as mqtt
