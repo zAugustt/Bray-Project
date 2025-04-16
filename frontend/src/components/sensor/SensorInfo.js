@@ -23,8 +23,8 @@ const SensorInfo = (props) => {
             <h2 className='sensor-details-header'>Sensor Details</h2>
             <div className='sensor-details-container'>
                 <p><strong>ID:</strong> {sensorInfo.id}</p>
-                <p><strong>DevEUI:</strong> {sensorInfo.devEUI}</p>
-                <p>{sensorInfo.auxSensorID ? "" : <strong>Number of Events:</strong> + ` ${sensorInfo.numEvents}`}</p>
+                {sensorInfo.devEUI !== "N/A" ? (<p><strong>DevEUI:</strong> {sensorInfo.devEUI}</p>) : (<p></p>)}
+                {sensorInfo.numEvents === -1 ? (<p><strong>Aux Sensor</strong></p>) : (<p><strong>Number of Events:</strong> {sensorInfo.numEvents}</p>)}
             </div>
         </div>
     )

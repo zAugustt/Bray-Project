@@ -9,6 +9,7 @@ import SensorInfo from './SensorInfo';
 import ViewEventsButton from './ViewEventsButton';
 import RefreshButton from '../RefreshButton';
 import { useSensorData } from '../../apiServices';
+import { useAuxSensorData } from '../../apiServices';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
@@ -22,17 +23,19 @@ const SensorTable = () => {
     const [selectedRowData, setSelectedRowData] = useState(null);
 
     const { sensorData, refreshData } = useSensorData();
+    const { auxSensorData, refreshAuxData} = useAuxSensorData();
     
     const [rowData, setRowData] = useState(sensorData);
 
     useEffect(() => {
         if(sensorData) {
-            setRowData(sensorData);
+            setRowData([...sensorData || [], ...auxSensorData || []]);
         }
-    }, [sensorData]);
+    }, [sensorData, auxSensorData]);
 
     const Refresh = () => {
         refreshData();
+        refreshAuxData();
     }
 
     const [colDefs] = useState([

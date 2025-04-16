@@ -139,8 +139,7 @@ def add_aux_sensor_data(session, aux_sensor_event: AuxSensorEvent):
     )
 
     # Add session to db (also adds other entities)
-    session.add(aux_sensor_data)
-
+    session.add(aux_sensor_data) 
 
 def add_sensor_event(session, sensor_event: SensorEvent):
     """
@@ -301,9 +300,9 @@ def get_aux_sensors(session):
     Returns:
         List[AuxSenosr]: List of auxilary sensors containing `AuxSensor` objects.
     """
-    return session.scalars(select(Sensor)
-                           .options(joinedload(AuxSensor.id))
-                           ).unique().all()
+    return session.scalars(select(AuxSensor)
+                           #.options(joinedload(AuxSensor.sensor_data))
+                           ).all()
 
 
 def get_sensors(session):
@@ -336,6 +335,16 @@ def get_events(session, sensor_id: int):
                            .filter_by(sensorID=sensor_id)
                            .options(joinedload(Event.deviceTrendInfo))
                            ).all()
+
+def get_aux_sensor_data(session, sensor_id: int):
+    """
+    retrieves the data tied to a sensor
+
+    Args:
+        session (_type_): Session object. See module header.
+        sensor_id (int): ID of a sensor
+    """
+    return session.scalars(select(AuxSensorData).filter_by(aux_sensor_id=sensor_id)).all()
 
 
 def get_event(session, sensor_id: int, event_id: int):

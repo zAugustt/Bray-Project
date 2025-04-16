@@ -33,6 +33,30 @@ export const useSensorData = () => {
     return { sensorData, refreshData: fetchData };
 };
 
+export const useAuxSensorData = () => {
+    const [auxSensorData, setAuxSensorData] = useState([]);
+
+    const fetchData = () => {
+        fetch(`http://localhost:5001/api_v1/aux_sensors`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                setAuxSensorData(data);
+            })
+            .catch(error => console.error("Error fetching data:", error));
+    };
+
+    useEffect(() => {
+        fetchData(); // Fetch data on mount
+    }, []);
+
+    return { auxSensorData, refreshAuxData: fetchData };
+};
+
 /**
  * Custom Hook: useSensorEvents
  * 
@@ -68,6 +92,32 @@ export const useSensorEvents = (sensorId) => {
 
     return { sensorEvents, refreshData: fetchData };
 };
+
+export const useAuxData = (sensorId) => {
+    const [auxData, setAuxData] = useState([]);
+
+    const fetchData = () => {
+        const url = `http://localhost:5001/api_v1/sensors/${sensorId}/data`;
+        
+        fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            setAuxData(data);
+        })
+        .catch(error => console.error("Error fetching data:", error))
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, [sensorId])
+
+    return { auxData, refreshData: fetchData }
+}
 
 /**
  * Custom Hook: useEventDetails

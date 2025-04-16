@@ -1,17 +1,12 @@
 """
 SensorEvent Module
 
-This module provides a `SensorEvent` which parses byte data into python objects. See
+This module provides a `AuxSensorEvent` which parses byte data into python objects. See
 [this repository](<https://github.com/Trans-Opt/Bray-LoRa-Firmware>) for detailed packet breakdown.
-
-NOTE: The `SMART DEVICE COMM` document and firmware do not follow the same structure for battery
-voltage and temperature. The packet parser follows the firmware's implementation.
-
-NOTE: The `SMART DEVICE COMM` document and firmware do not agree on a value for `typeOfStroke`. The
-documentation has the values of 0 and 1, while the firmware has values of 0 (undefined), 1 (open), and 2 (closed).
 
 Authors:
     Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
+    Josh Werner (joshdwerner2@gmail.com), Texas A&M University
 
 Date:
     November 2024

@@ -54,6 +54,13 @@ def sensors():
     sensor_datas = [{"id": sensor.id, "devEUI": sensor.devEUI, "numEvents": len(sensor.events)} for sensor in sensors]
     return jsonify(sensor_datas)
 
+@api_v1.route("/aux_sensors")
+def aux_sensors():
+
+    sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
+    sensor_datas = [{"id": sensor.id, "devEUI": "39-33-33-32-56-32-78-14", "numEvents": -1} for sensor in sensors]
+    return jsonify(sensor_datas)
+
 
 @api_v1.route("/sensors/<int:sensor_id>/events")
 @api_v1.route("/sensors/<int:sensor_id>/events/last/<int:last_n_events>")  # Convert to POST endpoint if more options needed
@@ -174,6 +181,25 @@ def devices():
         # Log the error and return a 500 response
         logging.error(f"Error fetching devices: {e}")
         return jsonify({"error": "Failed to fetch devices"}), 500
+
+@api_v1.route("/sensors/<int:sensor_id>/data", methods=["GET"])
+def aux_sensor_data(sensor_id: int):
+    """
+    Returns a json object containing the list of data points tied to a sensor
+    Args:
+        sensor_id (int): ID of sensor.
+    """
+    
+    datas = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
+    auxData = [
+        {
+            "id": data.id,
+            "timestamp": data.timestamp,
+            "percentage": data.value
+        }
+        for data in datas
+    ]
+    return jsonify(auxData)
 
 """
 @api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
