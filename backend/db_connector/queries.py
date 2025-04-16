@@ -135,7 +135,7 @@ def add_aux_sensor_data(session, aux_sensor_event: AuxSensorEvent):
     aux_sensor_data = AuxSensorData(
         aux_sensor_id = aux_sensor_event.aux_sensor_id,
         timestamp = aux_sensor_event.timestamp,
-        value = aux_sensor_event.co2_ppm
+        value = aux_sensor_event.co2_percentage
     )
 
     # Add session to db (also adds other entities)
