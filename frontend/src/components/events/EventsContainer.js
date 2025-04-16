@@ -40,7 +40,7 @@ const EventsContainer = () => {
             </div>
             <div className={isOpen ? 'right-column-open' : ''}>
                 <button className='openbtn' onClick={toggleSidebar} hidden={isOpen ? true : false}>
-                    ☰
+                    Trend Graphs
                 </button>
                 <div className='sidebar' hidden={isOpen ? false : true}>
                     <button className='closebtn' onClick={toggleSidebar}>
