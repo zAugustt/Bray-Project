@@ -24,6 +24,14 @@ const AuxDetailsContainer = () => {
         navigate(`/sensors`);
     }
 
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            refreshData();
+        }, 120000);
+
+        return () => clearInterval(intervalId);
+    }, [refreshData]);
+
     return(
         <div className='details-container'>
             <div className='sub-header-split-container'>
