@@ -21,6 +21,7 @@ Endpoints:
 Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
+    Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
 
 Date:
     November-19-2024
@@ -31,6 +32,7 @@ from flask import Blueprint, jsonify, Response, request
 from db_connector import DBConnector, queries
 from mqtt_client import ThreadedMQTTClient
 from mqtt_client.sensor_event import SensorEvent
+from mqtt_client.aux_sensor_event import AuxSensorEvent
 import logging, csv
 from io import StringIO
 from .custom_csv import fetch_event_data, format_event_data, write_event_csv
@@ -41,7 +43,7 @@ api_v1 = Blueprint("api_v1", __name__)
 # Create database connection
 _conn = DBConnector()
 
-
+### Torque Sensor API ###
 @api_v1.route("/sensors")
 def sensors():
     """
@@ -50,6 +52,13 @@ def sensors():
     """
     sensors = _conn.execute_query_readonly(queries.get_sensors)
     sensor_datas = [{"id": sensor.id, "devEUI": sensor.devEUI, "numEvents": len(sensor.events)} for sensor in sensors]
+    return jsonify(sensor_datas)
+
+@api_v1.route("/aux_sensors")
+def aux_sensors():
+
+    sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
+    sensor_datas = [{"id": sensor.id, "devEUI": "39-33-33-32-56-32-78-14", "numEvents": -1} for sensor in sensors]
     return jsonify(sensor_datas)
 
 
@@ -132,19 +141,96 @@ def event_download(sensor_id, event_id):
 def on_heartbeat_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 0)
 
-
 def on_data_packet(sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 1)
 
+def on_c02_packet(aux_sensor_event:AuxSensorEvent):
+    _conn.execute_query(queries.add_aux_sensor_data, aux_sensor_event)
 
 def on_event_summary_packet(sensor_event: SensorEvent, prev_sensor_event: SensorEvent):
     _conn.execute_query(queries.upsert_live_sensor_event, sensor_event, 2, prev_sensor_event)
 
+### Auxilary Sensor API ###
+@api_v1.route("/devices", methods=["GET"])
+def devices():
+    """
+    Returns a JSON object containing a list of devices from the DeviceInfo table.
+    Returns:
+        JSON: List of devices with their details or an error message if something goes wrong.
+    """
+    try:
+        # Fetch all devices from the database
+        devices = _conn.execute_query_readonly(queries.getDevInfo)
+
+        # Format the device data
+        device_data = [
+            {
+                "id": device.id,
+                "sensorName": device.sensorname,  # Corrected to match the database schema
+                "serialNumber": device.serialnumber,  # Corrected
+                "deviceType": device.devicetype,  # Corrected
+                "deviceLocation": device.devicelocation,  # Corrected
+            }
+            for device in devices
+        ]
+
+        # Return the formatted data as JSON
+        return jsonify(device_data), 200
+
+    except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching devices: {e}")
+        return jsonify({"error": "Failed to fetch devices"}), 500
+
+@api_v1.route("/sensors/<int:sensor_id>/data", methods=["GET"])
+def aux_sensor_data(sensor_id: int):
+    """
+    Returns a json object containing the list of data points tied to a sensor
+    Args:
+        sensor_id (int): ID of sensor.
+    """
+    
+    datas = _conn.execute_query_readonly(queries.get_aux_sensor_data, sensor_id)
+    auxData = [
+        {
+            "id": data.id,
+            "timestamp": data.timestamp,
+            "percentage": data.value
+        }
+        for data in datas
+    ]
+    return jsonify(auxData)
+
+"""
+@api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
+def device_events(sensor_id: int):
+    
+    Returns a JSON object containing a list of events, as well as trend data.
+    Args:
+        sensor_id (int): ID of sensor.
+    
+    try:
+        events = _conn.execute_query_readonly(queries.get_device_events, sensor_id)
+        event_data = [
+            {
+                "id": event.id,
+                "timestamp": event.timestamp,
+                "deviceDataID": event.devicedataid,
+                "deviceInfoID": event.deviceinfoid,
+            }
+            for event in events
+        ]
+        return jsonify(event_data), 200
+        except Exception as e:
+        # Log the error and return a 500 response
+        logging.error(f"Error fetching events: {e}")
+        return jsonify({"error": "Failed to fetch events"}), 500
+"""
 
 # Redundant code (deprecated by ThreadedMQTTClient)
 def on_message_complete(sensor_event: SensorEvent):
     _conn.execute_query(queries.add_sensor_event, sensor_event)
 
 
-threaded_client = ThreadedMQTTClient(on_heartbeat_packet, on_data_packet, on_event_summary_packet, on_message_complete)
+threaded_client = ThreadedMQTTClient(on_heartbeat_packet, on_data_packet, on_event_summary_packet, on_message_complete,on_c02_packet)
 threaded_client.start()

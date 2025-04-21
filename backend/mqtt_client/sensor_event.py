@@ -198,6 +198,7 @@ class SensorEvent:
         self.calculatedHeartbeatRecordPayloadCRC = CRC16_CCITT(data[:-2])
         if self.calculatedHeartbeatRecordPayloadCRC != self.heartbeatRecordPayloadCRC:
             logging.warning(f"Heartbeat record CRCs do not match. Actual: {self.heartbeatRecordPayloadCRC} Calculated: {self.calculatedHeartbeatRecordPayloadCRC}")
+            
 
     def __repr__(self) -> str:
         return "{}({!r})".format(self.__class__.__name__, self.__dict__)

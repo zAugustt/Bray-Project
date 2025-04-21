@@ -4,6 +4,42 @@ Investigate necessary components as we repurpose the legacy components for our i
 
 Backend: 
 
+docker exec -it bray-project-backend-1 python /app/db_connector/data_gen.py
+
+* Fixing garbage alembic versions 
+
+Clear databsae with 
+
+```
+DO $$ 
+BEGIN
+    EXECUTE (
+        SELECT string_agg('DROP TABLE IF EXISTS "' || tablename || '" CASCADE;', ' ')
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    );
+END $$;
+```
+
+```
+DO $$ 
+BEGIN
+    EXECUTE (
+        SELECT string_agg('TRUNCATE TABLE "' || tablename || '" RESTART IDENTITY CASCADE;', ' ')
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    );
+END $$;
+```
+
+Delete all versions in alembic
+
+docker exec -it bray-project-backend-1 alembic revision --autogenerate -m "Initial migration"
+
+docker exec -it bray-project-backend-1 alembic upgrade head
+
+docker exec -it bray-project-db-1 psql -U bray_tamu -d sensor_info_db -h db -p 5432
+
 This includes:
     - Models
     - Queries

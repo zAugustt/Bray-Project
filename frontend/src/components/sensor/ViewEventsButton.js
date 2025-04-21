@@ -1,5 +1,4 @@
 // ButtonCellRenderer.jsx
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /**
@@ -14,14 +13,28 @@ const ViewEventsButton = (props) => {
 
   const handleClick = () => {
     // Redirect to /events with the selected row's data
-    navigate(`/events/${props.data.id}`, { state: { rowData: props.data } });
+    if(props.data.numEvents !== -1) {
+      navigate(`/events/${props.data.id}`, { state: { rowData: props.data } });
+    } else {
+      navigate(`/aux_sensors/${props.data.id}`, { state: props.data })
+    }
+    
   };
 
-  return (
-    <button className='view-details-btn' onClick={handleClick}>
-      View Events
+  if(props.data.numEvents !== -1) {
+    return (
+      <button className='view-details-btn' onClick={handleClick}>
+        View Events
+      </button>
+    );
+  } else {
+    return (
+      <button className='view-details-btn' onClick={handleClick}>
+      View Data
     </button>
-  );
+    );
+  }
+  
 };
 
 export default ViewEventsButton;
