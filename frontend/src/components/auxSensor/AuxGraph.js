@@ -18,7 +18,7 @@ const AuxGraph = ({ auxData }) => {
     const formattedData = auxData.map((dataPoint, index) => ({
       index,
       timestamp: dataPoint.timestamp,
-      percentage: dataPoint.percentage / 1000.0, 
+      percentage: dataPoint.percentage/10000.0, 
   }));
 
     const gradientOffset = () => {

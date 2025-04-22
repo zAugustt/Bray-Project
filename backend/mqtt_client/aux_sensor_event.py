@@ -76,8 +76,15 @@ class AuxSensorEvent:
         if len(data) < 20:
             logging.warning("CO2 packet too short")
             return
+        
+        base_str = data[3:8].decode("utf-8") 
+        base_value = int(base_str)
 
-        self.co2_percentage =  data[3:8].decode("utf-8")
+        scaling_factor = data[12]
+        self.co2_percentage = base_value * scaling_factor
+        #self.co2_percentage =  data[3:8].decode("utf-8")
+        #self.co2_percentage = self.co2_percentage * int(data[12])
+            
         logging.info(f"Data as bytes: {data.hex()}")
         self.timestamp = datetime.now()
         logging.info(f"CO2 parsed (XX.XXX %): {self.co2_percentage} % ")
