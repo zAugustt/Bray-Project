@@ -166,7 +166,9 @@ class ThreadedMQTTClient(Thread):
         # Execute callbacks
         if port == "12":
             logging.info(">> Executing on_heartbeat_packet")
+            event["current_event"] = AuxSensorEvent()
             on_heartbeat_packet(event["current_event"]) if on_heartbeat_packet is not None else None
+            event["current_event"] = AuxSensorEvent()
         elif port == "13":
             logging.info(">> Executing on_data_packet")
             on_data_packet(event["current_event"]) if on_data_packet is not None else None
