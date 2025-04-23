@@ -1,4 +1,4 @@
-import { useSensorData, useSensorEvents, useEventDetails, useEventDetailsDownload } from '../apiServices';
+import { useSensorData, useSensorEvents, useEventDetails, useEventDetailsDownload, useAuxSensorData, useAuxData } from '../apiServices';
 import { renderHook, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -23,7 +23,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorData).toEqual(mockData);
       });
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/sensors');
     });
 
     it('handles fetch error', async () => {
@@ -35,7 +35,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorData).toEqual([]);
       });      
       
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/sensors');
     });
   });
 
@@ -54,7 +54,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorEvents).toEqual(mockEvents);
       });
 
-      expect(fetch).toHaveBeenCalledWith(`http://localhost:5000/api_v1/sensors/${mockSensorId}/events`);
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/events`);
     });
 
     it('handles fetch error in useSensorEvents', async () => {
@@ -67,7 +67,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.sensorEvents).toEqual([]);
       });
 
-      expect(fetch).toHaveBeenCalledWith(`http://localhost:5000/api_v1/sensors/${mockSensorId}/events`);
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/events`);
     });
   });
 
@@ -83,7 +83,7 @@ describe('Custom Hook Tests', () => {
 
       const { result, waitForNextUpdate } = renderHook(() => useEventDetails(mockSensorId, mockEventId, { hidden: false }));
       
-      expect(fetch).toHaveBeenCalledWith(`http://localhost:5000/api_v1/sensors/${mockSensorId}/events/${mockEventId}`);
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/events/${mockEventId}`);
     });
 
     it('handles fetch error in useEventDetails', async () => {
@@ -97,7 +97,69 @@ describe('Custom Hook Tests', () => {
         expect(result.current.eventDetails).toEqual([]);
       });
 
-      expect(fetch).toHaveBeenCalledWith(`http://localhost:5000/api_v1/sensors/${mockSensorId}/events/${mockEventId}`);
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/events/${mockEventId}`);
+    });
+  });
+
+  describe('useAuxSensorData', () => {
+    it('fetches aux sensor details successfully', async () => {
+      const mockSensors = [{id: 4, devEUI: "39-33-33-32-56-32-78-14", numEvents: -1}];
+      fetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockSensors,
+      });
+
+      const { result, waitForNextUpdate } = renderHook(() => useAuxSensorData());
+
+      await waitFor(() => {
+        expect(result.current.auxSensorData).toEqual(mockSensors);
+      });
+
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/aux_sensors');
+    });
+
+    it('handles fetch error in useAuxSensorData', async () => {
+      fetch.mockRejectedValueOnce( new Error('Network response was not ok'));
+
+      const { result, waitForNextUpdate } = renderHook(() => useAuxSensorData());
+
+      await waitFor(() => {
+        expect(result.current.auxSensorData).toEqual([]);
+      });
+
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/aux_sensors');
+    });
+  });
+
+  describe('useAuxData', () => {
+    it('fetches aux data successfully', async () => {
+      const mockSensorId = '9';
+      const mockAuxData = [{ id: 1, timestamp: '2025-04-11 17:58:27.130108', percentage: '5001'}];
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockAuxData,
+      });
+
+      const { result, waitForNextUpdate } = renderHook(() => useAuxData(mockSensorId));
+
+      await waitFor(() => {
+        expect(result.current.auxData).toEqual(mockAuxData);
+      });
+      
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/data`);
+    });
+
+    it('handles fetch error in useAuxData', async () => {
+      const mockSensorId = '9';
+      fetch.mockRejectedValueOnce(new Error("Network response was not ok"));
+
+      const { result, waitForNextUpdate } = renderHook(() => useAuxData(mockSensorId));
+
+      await waitFor(() => {
+        expect(result.current.auxData).toEqual([]);
+      });
+
+      expect(fetch).toHaveBeenCalledWith(`http://localhost:5001/api_v1/sensors/${mockSensorId}/data`);
     });
   });
 
@@ -115,7 +177,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.eventDetails).toEqual(mockBlob);
       });
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors/1/events/1/download/hidden');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/sensors/1/events/1/download/hidden');
     });
 
     it('fetches and sets event details as Blob (without hidden parameter)', async () => {
@@ -131,7 +193,7 @@ describe('Custom Hook Tests', () => {
         expect(result.current.eventDetails).toEqual(mockBlob);
       });
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors/1/events/1/download');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/sensors/1/events/1/download');
     });
 
     it('handles network error in useEventDetailsDownload', async () => {
@@ -140,7 +202,7 @@ describe('Custom Hook Tests', () => {
       const { result, waitForNextUpdate } = renderHook(() => useEventDetailsDownload('1', '1', { hidden: false }));
 
       expect(result.current.eventDetails).toBeNull();
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api_v1/sensors/1/events/1/download');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5001/api_v1/sensors/1/events/1/download');
     });
   });
 });

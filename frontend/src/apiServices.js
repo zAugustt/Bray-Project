@@ -33,6 +33,15 @@ export const useSensorData = () => {
     return { sensorData, refreshData: fetchData };
 };
 
+/**
+ * Custom Hook: useAuxSensorData
+ * 
+ * Fetches all avaliable aux sensors in the database
+ * 
+ * @returns {Object} - An object containing:
+ * - `auxSensorData` (Array): The array of aux sensors retrieved from the API.
+ * - `refreshData` (Function): A function to manually refetch aux sensors.
+ */
 export const useAuxSensorData = () => {
     const [auxSensorData, setAuxSensorData] = useState([]);
 
@@ -93,6 +102,17 @@ export const useSensorEvents = (sensorId) => {
     return { sensorEvents, refreshData: fetchData };
 };
 
+/**
+ * Custom Hook: useAuxData
+ * 
+ * Fetches all events associated with given sensor
+ * 
+ * @param {string | Number} sensorId - The ID of the aux sensor for which data needs to be fetched.
+ * 
+ * @returns {Object} - An object containing:
+ * - `auxData` (Array): Returns all data associated with the param sensor.
+ * - `refreshData` (Function): A function to manually refetch data of the sensor
+ */
 export const useAuxData = (sensorId) => {
     const [auxData, setAuxData] = useState([]);
 
