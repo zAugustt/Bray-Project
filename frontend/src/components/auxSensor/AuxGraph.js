@@ -51,7 +51,7 @@ const AuxGraph = ({ auxData }) => {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="index" ticks ={xAxisTicks}  label={{ value: 'Timestamp', position: 'insideBottom', offset: -10 }} />
+                <XAxis dataKey="timestamp" interval="preserveStartEnd" tick={{ angle: 90, textAnchor: 'start' }}  label={{ value: 'Timestamp', position: 'insideBottom', offset: -10 }} />
                 <YAxis  label={{ value: 'CO2 (%)', angle: -90, position: 'insideLeft' }} />
                 <Tooltip 
                 formatter={(value, name, props) => {
