@@ -7,18 +7,24 @@ echo_usage() {
 test_backend() {
     mkdir -p test_output
 
+    # Build and start the backend container
     docker compose build backend
     docker compose up -d backend
-    cid=$(docker ps -q -f name=bray-torque-dashboard-backend-1)
+    cid=$(docker ps -q -f name=bray-project-backend-1)
+
+    # Run tests
     docker exec $cid pytest
+
+    # Copy test results
     docker cp "$cid:/app/pytest_report.html" test_output/
-    docker cp "$cid:/app/htmlcov" test_output
+    docker cp "$cid:/app/htmlcov" test_output/
     docker compose down
 }
 
-# Check if the first argument is "backend"
+# Check the first argument
 if [ "$1" == "backend" ]; then
     test_backend
 else
+    echo "No argument provided."
     echo_usage
 fi

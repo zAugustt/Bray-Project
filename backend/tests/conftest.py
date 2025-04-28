@@ -4,7 +4,7 @@ from os.path import join
 from flask import Flask
 from api_v1 import api_v1
 
-SAMPLE_DATA="tests/sample_data"  # Bray TAMU capstone firmware
+SAMPLE_DATA="../Bray-Torque-Dashboard-main/backend/tests/sample_data"  # Bray TAMU capstone firmware
 
 
 def create_app():

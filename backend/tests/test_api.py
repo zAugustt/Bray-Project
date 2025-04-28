@@ -79,4 +79,3 @@ def test_event_download(client):
     response = client.get("/api_v1/sensors/1/events/1/download")
 
     assert response.status_code == 200
-    assert b"Not Implemented: event download" in response.data

@@ -1,3 +1,4 @@
+
 # backend/Dockerfile
 # Use an official Python image
 FROM python:3.11-alpine
@@ -13,6 +14,9 @@ RUN pip install -r requirements.txt
 
 # Copy the rest of the app
 COPY . .
+
+# Copy .coveragerc into the container
+COPY tests/.coveragerc /app/backend/tests/.coveragerc
 
 # Expose the Flask port
 EXPOSE 5000
