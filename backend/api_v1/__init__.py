@@ -22,6 +22,7 @@ Authors:
     Aidan Queng (jaidanqueng@gmail.com), Texas A&M University
     Michael Orgunov (michaelorgunov@gmail.com), Texas A&M University
     Aysen De La Cruz (delacruzaysen@gmail.com), Texas A&M University
+    Abdiel Rivera (arivera15@tamu.edu), Texas A&M University
 
 Date:
     November-19-2024
@@ -56,7 +57,9 @@ def sensors():
 
 @api_v1.route("/aux_sensors")
 def aux_sensors():
-
+    """
+    Returns a JSON object containing a list of sensors. Also provides devEUI associated with sensor.
+    """
     sensors = _conn.execute_query_readonly(queries.get_aux_sensors)
     sensor_datas = [{"id": sensor.id, "devEUI": "39-33-33-32-56-32-78-14", "numEvents": -1} for sensor in sensors]
     return jsonify(sensor_datas)
@@ -200,32 +203,6 @@ def aux_sensor_data(sensor_id: int):
         for data in datas
     ]
     return jsonify(auxData)
-
-"""
-@api_v1.route("/devices/<int:sensor_id>/events", methods=["GET"])
-def device_events(sensor_id: int):
-    
-    Returns a JSON object containing a list of events, as well as trend data.
-    Args:
-        sensor_id (int): ID of sensor.
-    
-    try:
-        events = _conn.execute_query_readonly(queries.get_device_events, sensor_id)
-        event_data = [
-            {
-                "id": event.id,
-                "timestamp": event.timestamp,
-                "deviceDataID": event.devicedataid,
-                "deviceInfoID": event.deviceinfoid,
-            }
-            for event in events
-        ]
-        return jsonify(event_data), 200
-        except Exception as e:
-        # Log the error and return a 500 response
-        logging.error(f"Error fetching events: {e}")
-        return jsonify({"error": "Failed to fetch events"}), 500
-"""
 
 # Redundant code (deprecated by ThreadedMQTTClient)
 def on_message_complete(sensor_event: SensorEvent):

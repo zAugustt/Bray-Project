@@ -30,7 +30,7 @@ class AuxSensorEvent:
     #CO2 sensor field
     co2_percentage: int = None 
     #hardcoding the aux sensor data
-    aux_sensor_id: int = 6
+    aux_sensor_id: int = None
 
     def __init__(self):
         self.timestamp = None
@@ -78,16 +78,22 @@ class AuxSensorEvent:
             return
         
         base_str = data[3:8].decode("utf-8") 
+        if base_str == '\x00\x00\x00\x00\x00':
+            base_str = "10"
         base_value = int(base_str)
 
         scaling_factor = data[12]
+        if scaling_factor == 0:
+            scaling_factor=10
         self.co2_percentage = base_value * scaling_factor
+        self.aux_sensor_id = data[14:20].decode("utf-8")
         #self.co2_percentage =  data[3:8].decode("utf-8")
         #self.co2_percentage = self.co2_percentage * int(data[12])
             
         logging.info(f"Data as bytes: {data.hex()}")
         self.timestamp = datetime.now()
         logging.info(f"CO2 parsed (XX.XXX %): {self.co2_percentage} % ")
+        logging.info(f"CO2 sensor ID parsed: {self.aux_sensor_id} ")
         
 
     def __repr__(self) -> str:

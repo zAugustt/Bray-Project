@@ -68,7 +68,7 @@ describe('EventsContainer', () => {
     render(<EventsContainer />);
 
     // Sidebar is hidden initially; open button should be visible
-    const openButton = screen.getByText('☰');
+    const openButton = screen.getByText('Trend Graphs');
     expect(openButton).toBeVisible();
 
     // Click open button to show sidebar
