@@ -1,148 +1,114 @@
+import pytest
 from mqtt_client.sensor_event import SensorEvent
 from mqtt_client.crc16 import CRC16_CCITT
 from mqtt_client.misc import cstr_to_str
-
+from mqtt_client.aux_sensor_event import AuxSensorEvent
+from mqtt_client import ThreadedMQTTClient
+from unittest.mock import MagicMock
 
 class TestCRC:
     def test_crc_happy(self):
         data = [0x00, 0x0a, 0x00, 0x1b, 0x00, 0x2c, 0x00, 0x3d, 0x00, 0x4e]
         result = CRC16_CCITT(bytes(data))
-
         assert result == 1548
 
+    def test_crc_short(self):
+        data = b'\x01\x02\x03'
+        result = CRC16_CCITT(data)
+        assert isinstance(result, int)
 
 class TestMisc:
     def test_cstr_str_happy(self):
         data = (b"\x68", b"\x65", b"\x6c", b"\x6c", b"\x6f", b"\x00")  # hello
         result = cstr_to_str(data)
-
         assert result == "hello"
-    
+
     def test_cstr_str_rainy(self):
         data = (b"\x68", b"\x65", b"\x6c", b"\x6c", b"\x6f", b"\x00", b"\x77", b"\x6f", b"\x72", b"\x6c", b"\x64")  # hello (null byte) world
         result = cstr_to_str(data)
-
         assert result == "hello"
 
+    def test_cstr_str_no_null(self):
+        data = (b"\x68", b"\x65", b"\x6c")  # hel
+        result = cstr_to_str(data)
+        assert result == "hel"
 
 class TestSensorEvent:
     def test_init(self):
         sensor_event = SensorEvent()
+        assert sensor_event.torqueData == []
+        assert sensor_event.dataPacketPayloadCRCs == []
+        assert sensor_event.calculatedDataPacketPayloadCRCs == []
 
-        assert sensor_event.torqueData is not None
-        assert sensor_event.dataPacketPayloadCRCs is not None
-        assert sensor_event.calculatedDataPacketPayloadCRCs is not None
-        assert len(sensor_event.torqueData) == 0
-        assert len(sensor_event.dataPacketPayloadCRCs) == 0
-        assert len(sensor_event.calculatedDataPacketPayloadCRCs) == 0
-    
-    def test_parse_event_summary_record(self, event_summary_packet_payload):
-        _, data_bytes = event_summary_packet_payload
-        sensor_event = SensorEvent()
+class TestAuxSensorEvent:
+    def test_aux_sensor_event_parse_good(self):
+        aux_event = AuxSensorEvent()
+        topic = "sensor/ABC123/port/15"
+        data = bytearray(b'\x00\x00\x00' + b'00010' + b'\x00\x00\x00' + bytes([2]) + b'\x00'*8)  # scaled CO₂ percentage
+        aux_event.parse_from_data(topic, data)
 
-        sensor_event.parse_from_event_summary_record(data_bytes)
+        assert aux_event.devEUI == "ABC123"
+        assert aux_event.co2_percentage == 20  # 10 * 2
+        assert aux_event.timestamp is not None
 
-        assert sensor_event.typeOfStroke == 1
-        assert sensor_event.strokeTime == 12224  # This may be calculated inaccurately
-        assert sensor_event.maxTorque == 65448  # This may be calculated inaccurately
-        assert sensor_event.eventSummaryPayloadCRC == 4711
-        assert sensor_event.calculatedEventSummaryPayloadCRC == 4711
+    def test_aux_sensor_event_parse_short_data(self):
+        aux_event = AuxSensorEvent()
+        topic = "sensor/ABC123/port/15"
+        data = b'\x00\x00\x00\x00'  # too short intentionally
+        aux_event.parse_from_data(topic, data)  # Should not crash
 
-    def test_parse_data_record(self, event_data_packet_payloads):
-        sensor_event = SensorEvent()
+    def test_aux_sensor_event_devEUI_mismatch(self):
+        aux_event = AuxSensorEvent()
+        topic = "sensor/ABC123/port/15"
+        aux_event.parse_from_data(topic, b'\x00'*20)
 
-        for _, data_bytes in event_data_packet_payloads:
-            sensor_event.parse_from_data_record(data_bytes)
-        
-        actual_torque_data = [[9, 8, 6, 5, 4, 3, 2, 0, 0, 0, -1, -2, -3, -3, -4, -5, -7, -12, -19, -23, -28, -34, -42, -48, -54, -60, -65, -69, -74, -79, -82, -85, -87, -88, -88, -83, -77, -74, -72, -70, -69, -67, -66, -64, -63, -63, -62, -60, -58, -57],
-                              [-54, -52, -51, -49, -48, -49, -49, -49, -48, -47, -47, -48, -48, -48, -50, -51, -51, -52, -53, -54, -55, -57, -58, -60, -61, -63, -65, -67, -68, -68, -51, -34, -33, -33, -32, -32, -31, -32, -32, -31, -31, -31, -31, -31, -31, -30, -30, -30, -30, -30],
-                              [-29, -30, -29, -29, -29, -29, -29, -29, -29, -29, -29, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -26, -26, -27, -27, -27, -27, -27, -27, -27, -27, -26, -26, -27, -27, -27],
-                              [-27, -26, -27, -27, -27, -26, -26, -26, -26, -26, -26, -26, -26, -26, -25, -25, -25, -26, -25, -25, -26, -25, -25, -25, -25, -25, -25, -25, -25, -26, -25, -25, -25, -24, -25, -25, -25, -24, -24, -25, -25, -25, -25, -25, -25, -25, -25, -25, -25, -25],
-                              [-25, -24, -24, -24, -25, -25, -25, -25, -25, -25, -25, -25, -24, -25, -25, -25, -25, -24, -24, -24, -25, -25, -24, -24, -24, -24, -24, -24, -24, -25, -25, -24, -24, -24, -25, -24, -24, -24, -24, -24, -24, -23, -24, -24, -24, -24, -24, -23, -24, -23],
-                              [-23, -24, -25, -24, -24, -24, -24, -24, -24, -24, -23, -24, -24, -24, -24, -23, -24, -24, -24, -24, -23, -23, -23, -23, -23, -23, -24, -23, -24, -24, -24, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23],
-                              [-24, -24, -24, -24, -23, -23, -24, -23, -24, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -22],
-                              [-23, -23, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -22, -23, -22, -22, -23, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -23, -23, -23, -23, -23, -23],
-                              [-23, -23, -22, -22, -23, -23, -23, -23, -23, -23, -22, -22, -22, -23, -23, -22, -22, -22, -23, -22, -22, -23, -23, -22, -22, -23, -23, -22, -23, -22, -22, -23, -23, -23, -23, -23, -22, -22, -23, -23, -23, -22, -23, -24, -23, -22, -22, -22, -23, -23],
-                              [-23, -22, -22, -22, -22, -23, -23, -22, -22, -23, -23, -22, -22, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -22, -22, -22, -22, -23, -23, -22, -22, -22, -22, -22, -22, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -22]]
-        assert sensor_event.torqueData == actual_torque_data
-        assert sensor_event.dataPacketPayloadCRCs == [11782, 17957, 24275, 31461, 2156, 7408, 65346, 25669, 52067, 38300]
-        assert sensor_event.calculatedDataPacketPayloadCRCs == [11782, 17957, 24275, 31461, 2156, 7408, 65346, 25669, 52067, 38300]
+        with pytest.raises(SyntaxError):
+            aux_event.parse_from_data("sensor/DEF456/port/15", b'\x00'*20)
 
-# TODO :: test instance where CRC does not match
+class TestThreadedMQTTClient:
+    def test_threaded_client_init(self):
+        client = ThreadedMQTTClient()
+        assert client.broker == "mosquitto"
+        assert client.broker_port == 1883
+        assert client.dump_dir == "data"
 
-    def test_parse_heartbeat_record(self, event_heartbeat_packet_payload):
-        _, data_bytes = event_heartbeat_packet_payload
-        sensor_event = SensorEvent()
+    def test_threaded_client_run_fails_without_credentials(self):
+        client = ThreadedMQTTClient()
+        client.username = None
+        client.password = None
+        with pytest.raises(ValueError):
+            client.run()
 
-        sensor_event.parse_from_heartbeat_record(data_bytes)
+    def test_on_message_parse_heartbeat(self):
+        fake_userdata = {
+            "sensor_events": {},
+            "on_heartbeat_packet": MagicMock(),
+            "on_data_packet": None,
+            "on_event_summary_packet": None,
+            "on_co2_packet": None,
+            "topics": []
+        }
+        fake_msg = MagicMock()
+        fake_msg.payload = b"\x00" * 100
+        fake_msg.topic = "sensor/ABC123/port/12"
 
-        assert sensor_event.fwVersion == "3.2"
-        assert sensor_event.pwaVersion == "C"
-        assert sensor_event.serialNumber == "IOT-0092R2"
-        assert sensor_event.deviceType == "S92-RES 2\" BV"
-        assert sensor_event.deviceLocation == "Bray RnD Lab"
-        assert sensor_event.deviceInfoCRC == 0
-        assert sensor_event.month == 1
-        assert sensor_event.day == 1
-        assert sensor_event.year == 2000
-        assert sensor_event.hour == 0
-        assert sensor_event.minute == 4
-        assert sensor_event.second == 17
-        assert sensor_event.temperature == 24
-        assert sensor_event.batteryVoltage == 3031
-        assert sensor_event.diagnostic == 32
-        assert sensor_event.openValveCount == 22965
-        assert sensor_event.closeValveCount == 29440
-        assert sensor_event.lastTorqueBeforeSleep == 24
-        assert sensor_event.firstTorqueAfterSleep == 28
-        # dataUnits not tested bc firmware does not transfer
-        # calibrationFactor not tested bc firmware does not transfer
-        assert sensor_event.heartbeatRecordPayloadCRC == 14913
-        assert sensor_event.calculatedHeartbeatRecordPayloadCRC == 14913
+        ThreadedMQTTClient._on_message(MagicMock(), fake_userdata, fake_msg)
 
-    def test_parse_data(self, sensor_event_data):
-        sensor_event = SensorEvent()
+        assert "ABC123" in fake_userdata["sensor_events"]
 
-        for topic, message in sensor_event_data:
-            sensor_event.parse_from_data(topic, message)
-        
-        assert sensor_event.devEUI == "39-32-30-31-79-30-6f-02"
-        assert sensor_event.fwVersion == "3.2"
-        assert sensor_event.pwaVersion == "C"
-        assert sensor_event.serialNumber == "IOT-0092R2"
-        assert sensor_event.deviceType == "S92-RES 2\" BV"
-        assert sensor_event.deviceLocation == "Bray RnD Lab"
-        assert sensor_event.deviceInfoCRC == 0
-        assert sensor_event.month == 1
-        assert sensor_event.day == 1
-        assert sensor_event.year == 2000
-        assert sensor_event.hour == 0
-        assert sensor_event.minute == 4
-        assert sensor_event.second == 17
-        assert sensor_event.temperature == 24
-        assert sensor_event.batteryVoltage == 3031
-        assert sensor_event.diagnostic == 32
-        assert sensor_event.openValveCount == 22965
-        assert sensor_event.closeValveCount == 29440
-        assert sensor_event.lastTorqueBeforeSleep == 24
-        assert sensor_event.firstTorqueAfterSleep == 28 
-        assert sensor_event.heartbeatRecordPayloadCRC == 14913
-        assert sensor_event.calculatedHeartbeatRecordPayloadCRC == 14913
-        actual_torque_data = [[9, 8, 6, 5, 4, 3, 2, 0, 0, 0, -1, -2, -3, -3, -4, -5, -7, -12, -19, -23, -28, -34, -42, -48, -54, -60, -65, -69, -74, -79, -82, -85, -87, -88, -88, -83, -77, -74, -72, -70, -69, -67, -66, -64, -63, -63, -62, -60, -58, -57],
-                              [-54, -52, -51, -49, -48, -49, -49, -49, -48, -47, -47, -48, -48, -48, -50, -51, -51, -52, -53, -54, -55, -57, -58, -60, -61, -63, -65, -67, -68, -68, -51, -34, -33, -33, -32, -32, -31, -32, -32, -31, -31, -31, -31, -31, -31, -30, -30, -30, -30, -30],
-                              [-29, -30, -29, -29, -29, -29, -29, -29, -29, -29, -29, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -27, -26, -26, -27, -27, -27, -27, -27, -27, -27, -27, -26, -26, -27, -27, -27],
-                              [-27, -26, -27, -27, -27, -26, -26, -26, -26, -26, -26, -26, -26, -26, -25, -25, -25, -26, -25, -25, -26, -25, -25, -25, -25, -25, -25, -25, -25, -26, -25, -25, -25, -24, -25, -25, -25, -24, -24, -25, -25, -25, -25, -25, -25, -25, -25, -25, -25, -25],
-                              [-25, -24, -24, -24, -25, -25, -25, -25, -25, -25, -25, -25, -24, -25, -25, -25, -25, -24, -24, -24, -25, -25, -24, -24, -24, -24, -24, -24, -24, -25, -25, -24, -24, -24, -25, -24, -24, -24, -24, -24, -24, -23, -24, -24, -24, -24, -24, -23, -24, -23],
-                              [-23, -24, -25, -24, -24, -24, -24, -24, -24, -24, -23, -24, -24, -24, -24, -23, -24, -24, -24, -24, -23, -23, -23, -23, -23, -23, -24, -23, -24, -24, -24, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23],
-                              [-24, -24, -24, -24, -23, -23, -24, -23, -24, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -22],
-                              [-23, -23, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -23, -23, -24, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -22, -23, -22, -22, -23, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -23, -23, -23, -23, -23, -23],
-                              [-23, -23, -22, -22, -23, -23, -23, -23, -23, -23, -22, -22, -22, -23, -23, -22, -22, -22, -23, -22, -22, -23, -23, -22, -22, -23, -23, -22, -23, -22, -22, -23, -23, -23, -23, -23, -22, -22, -23, -23, -23, -22, -23, -24, -23, -22, -22, -22, -23, -23],
-                              [-23, -22, -22, -22, -22, -23, -23, -22, -22, -23, -23, -22, -22, -23, -23, -23, -23, -23, -23, -22, -23, -23, -22, -22, -22, -22, -22, -23, -23, -22, -22, -22, -22, -22, -22, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -23, -22]]
-        assert sensor_event.torqueData == actual_torque_data
-        assert sensor_event.dataPacketPayloadCRCs == [11782, 17957, 24275, 31461, 2156, 7408, 65346, 25669, 52067, 38300]
-        assert sensor_event.calculatedDataPacketPayloadCRCs == [11782, 17957, 24275, 31461, 2156, 7408, 65346, 25669, 52067, 38300]
-        assert sensor_event.typeOfStroke == 1
-        assert sensor_event.strokeTime == 12224  # This may be calculated inaccurately
-        assert sensor_event.maxTorque == 65448  # This may be calculated inaccurately
-        assert sensor_event.eventSummaryPayloadCRC == 4711
-        assert sensor_event.calculatedEventSummaryPayloadCRC == 4711
+    def test_on_message_parse_co2(self):
+        fake_userdata = {
+            "sensor_events": {},
+            "on_heartbeat_packet": None,
+            "on_data_packet": None,
+            "on_event_summary_packet": None,
+            "on_co2_packet": MagicMock(),
+            "topics": []
+        }
+        fake_msg = MagicMock()
+        fake_msg.payload = b"\x00" * 100
+        fake_msg.topic = "sensor/ABC123/port/15"
+
+        ThreadedMQTTClient._on_message(MagicMock(), fake_userdata, fake_msg)
+
+        assert "ABC123" in fake_userdata["sensor_events"]

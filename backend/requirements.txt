@@ -11,5 +11,5 @@ sqlalchemy
 alembic
 Werkzeug==3.0.4
 pytest
-pytest-cov
+pytest-cov==4.1.0
 pytest-html

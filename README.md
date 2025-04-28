@@ -35,7 +35,7 @@ Programs
     - mosquitto 2.0.20
 
 Tools
-- [GitHub](<https://github.com/Trans-Opt/Bray-Torque-Dashboard.git>)
+- GitHub
 - Jira
 - Git
 
@@ -73,7 +73,7 @@ Download this code repository by using git:
 
 ## Tests
 
-Pipeline in progress.
+Run `./test.sh backend` to run the functional tests on the backend
 
 ## Execute Code
 

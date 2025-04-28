@@ -23,6 +23,7 @@ services:
       - mosquitto
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PYTHONPATH=/app
     env_file:
       - path: ./.env
         required: true
@@ -44,6 +45,22 @@ services:
       - path: ./override.env
         required: false
 
+  db_test:
+    image: postgres:13-alpine
+    restart: always
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Expose the test database on port 5433
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user"]
+      interval: 5s
+      retries: 5
+
   mosquitto:
     build:
       context: ./mqtt_broker
@@ -62,3 +79,4 @@ volumes:
   postgres_data:
   mosquitto_data:
   mosquitto_log:
+  postgres_test_data:

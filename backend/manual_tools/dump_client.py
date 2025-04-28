@@ -1,3 +1,5 @@
+# pragma: no cover
+
 """
 Standalone python file meant for debugging purposes. This program dumps the message payloads from the MQTT broker into
 files, requiring the `MQTT_USERNAME` and `MQTT_PASSWORD` to be set.
